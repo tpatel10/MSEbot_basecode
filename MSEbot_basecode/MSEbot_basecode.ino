@@ -46,10 +46,10 @@
 
 
 //pins
-#define MOTORLEFTa 14
-#define MOTORLEFTb 4
-#define MOTORRIGHTa 5
-#define MOTORRIGHTb 18
+#define MOTORLEFTa 4
+#define MOTORLEFTb 18
+#define MOTORRIGHTa 19
+#define MOTORRIGHTb 12
 
 
 #include <esp_task_wdt.h>
@@ -124,7 +124,7 @@ void loop()
     case 0: 
     {
       CR1_ulMotorTimerNow = millis();
-      if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= 5000)   
+      if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= 1000)   
       {   
        CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
        switch(ucMotorStateIndex)
