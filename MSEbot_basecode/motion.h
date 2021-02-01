@@ -27,10 +27,10 @@ void setupMotion (void)
   ;
   
   //setup PWM for motors
-  ledcAttachPin(MOTORLEFTa, 1); // assign Motors pins to channels
-  ledcAttachPin(MOTORLEFTb, 2);
-  ledcAttachPin(MOTORRIGHTa, 3);
-  ledcAttachPin(MOTORRIGHTb, 4);
+  ledcAttachPin(ciMotorLeftA, 1); // assign Motors pins to channels
+  ledcAttachPin(ciMotorLeftB, 2);
+  ledcAttachPin(ciMotorRightA, 3);
+  ledcAttachPin(ciMotorRightB, 4);
 
     // Initialize channels 
   // channels 0-15, resolution 1-16 bits, freq limits depend on resolution

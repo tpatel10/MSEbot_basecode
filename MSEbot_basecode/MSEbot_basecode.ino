@@ -44,13 +44,21 @@
 
 #include "0_Core_Zero.h"
 
-
-//pins
-#define MOTORLEFTa 4
-#define MOTORLEFTb 18
-#define MOTORRIGHTa 19
-#define MOTORRIGHTb 12
-
+//Pin assignments
+const int ciHeartbeatLED = 2;
+const int ciPB1 = 27;
+const int ciPB2 = 26;
+const int ciPot1 = 32;
+const int ciLimitSwitch = 25;
+const int ciIRDetector = 16;
+const int ciMotorLeftA = 4;
+const int ciMotorLeftB = 18;
+const int ciMotorRightA = 19;
+const int ciMotorRightB = 12;
+const int ciEncoderLeftA = 17;
+const int ciEncoderLeftB = 5;
+const int ciEncoderRightA = 14;
+const int ciEncoderRightB = 13;
 
 #include <esp_task_wdt.h>
 
@@ -64,6 +72,8 @@ void loopWEBServerButtonresponce(void);
 
 
 const int CR1_ciMainTimer =  1000;
+const int CR1_ciHeartbeatTime = 500;
+const int CR1_ciMotorRunTime = 1000;
 
 unsigned char CR1_ucMainTimerCaseCore1;
 
@@ -78,6 +88,11 @@ unsigned long CR1_ulMainTimerNow;
 
 unsigned long CR1_ulMotorTimerPrevious;
 unsigned long CR1_ulMotorTimerNow;
+
+unsigned long CR1_ulHeartbeatTimerPrevious;
+unsigned long CR1_ulHeartbeatTimerNow;
+
+boolean btHeartbeat = true;
 
 void setup() {
   Serial.begin(115200);
@@ -102,6 +117,7 @@ void setup() {
    WDT_ResetCore1(); 
 
    setupMotion();
+   pinMode(ciHeartbeatLED, OUTPUT);
 }
 void loop()
 {
@@ -124,7 +140,7 @@ void loop()
     case 0: 
     {
       CR1_ulMotorTimerNow = millis();
-      if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= 1000)   
+      if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
       {   
        CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
        switch(ucMotorStateIndex)
@@ -271,4 +287,12 @@ void loop()
   }
  }
 
+ // Heartbeat LED
+ CR1_ulHeartbeatTimerNow = millis();
+ if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatTime)
+ {
+    CR1_ulHeartbeatTimerPrevious = CR1_ulHeartbeatTimerNow;
+    btHeartbeat = !btHeartbeat;
+    digitalWrite(ciHeartbeatLED, btHeartbeat);
+ }
 }
