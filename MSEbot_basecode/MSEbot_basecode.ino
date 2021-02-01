@@ -72,8 +72,9 @@ void loopWEBServerButtonresponce(void);
 
 
 const int CR1_ciMainTimer =  1000;
-const int CR1_ciHeartbeatTime = 500;
+const int CR1_ciHeartbeatInterval = 500;
 const int CR1_ciMotorRunTime = 1000;
+const long CR1_clDebounceDelay = 50;
 
 unsigned char CR1_ucMainTimerCaseCore1;
 
@@ -83,16 +84,23 @@ uint32_t CR1_u32Temp;
 uint32_t CR1_u32Avg;
 
 
+
+unsigned long CR1_ulLastDebounceTime;
+
 unsigned long CR1_ulMainTimerPrevious;
 unsigned long CR1_ulMainTimerNow;
 
 unsigned long CR1_ulMotorTimerPrevious;
 unsigned long CR1_ulMotorTimerNow;
+unsigned char ucMotorStateIndex = 0;
 
 unsigned long CR1_ulHeartbeatTimerPrevious;
 unsigned long CR1_ulHeartbeatTimerNow;
 
 boolean btHeartbeat = true;
+boolean btRun = false;
+int iButtonState;
+int iLastButtonState = HIGH;
 
 void setup() {
   Serial.begin(115200);
@@ -118,16 +126,39 @@ void setup() {
 
    setupMotion();
    pinMode(ciHeartbeatLED, OUTPUT);
+   pinMode(ciPB1, INPUT_PULLUP);
 }
 void loop()
 {
 
   //WSVR_BreakPoint(1);
  
- 
+  int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
+  if (iButtonValue != iLastButtonState) {      // if value has changed
+     CR1_ulLastDebounceTime = millis();        // reset the debouncing timer
+  }
+
+ if ((millis() - CR1_ulLastDebounceTime) > CR1_clDebounceDelay) {
+    if (iButtonValue != iButtonState) {        // if the button state has changed
+    iButtonState = iButtonValue;               // update current button state
+
+     // only toggle the run condition if the new button state is LOW
+     if (iButtonState == LOW) {
+       btRun = !btRun;
+       // if stopping, reset motor states and stop motors
+       if(!btRun) {
+          ucMotorStateIndex = 0; 
+          ucMotorState = 0;
+          move(0);
+       }
+     }
+   }
+ }
+ iLastButtonState = iButtonValue;             // store button state
+
  
  CR1_ulMainTimerNow = micros();
- if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)
+ if((CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer) && btRun)
  {
    WDT_ResetCore1(); 
    WDT_ucCaseIndexCore0 = CR0_ucMainTimerCaseCore0;
@@ -289,7 +320,7 @@ void loop()
 
  // Heartbeat LED
  CR1_ulHeartbeatTimerNow = millis();
- if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatTime)
+ if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatInterval)
  {
     CR1_ulHeartbeatTimerPrevious = CR1_ulHeartbeatTimerNow;
     btHeartbeat = !btHeartbeat;

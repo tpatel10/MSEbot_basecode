@@ -5,7 +5,6 @@ unsigned char ucMotion_Speed;
 
 
 unsigned char ucMotorState = 0;
-unsigned char ucMotorStateIndex = 0;
 
 double dManualSpeed;
 double dForwardSpeed;
