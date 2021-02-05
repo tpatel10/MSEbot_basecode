@@ -37,10 +37,7 @@
   28            GPIO13/AD2_4/T4/SD_D3/            Slide Switch S1a                                                                     Right Encoder, Channel B
   29            GND                               GND                                                                                  GND
   30            VIN                               PWR 5V t 7V                                                                          PWR 5V to 7V
-
 */
-
-
 
 #include "0_Core_Zero.h"
 
@@ -101,12 +98,11 @@ int iButtonState;
 int iLastButtonState = HIGH;
 
 void setup() {
-  Serial.begin(115200);
- 
-  
-  Core_ZEROInit();
+   Serial.begin(115200);
+   
+   Core_ZEROInit();
 
-  WDT_EnableFastWatchDogCore1();
+   WDT_EnableFastWatchDogCore1();
    WDT_ResetCore1();
    WDT_vfFastWDTWarningCore1[0] = 0;
    WDT_vfFastWDTWarningCore1[1] = 0;
@@ -153,7 +149,6 @@ void loop()
    }
  }
  iLastButtonState = iButtonValue;             // store button state
-
  
  CR1_ulMainTimerNow = micros();
  if((CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer) && btRun)
