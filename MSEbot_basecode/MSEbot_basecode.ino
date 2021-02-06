@@ -29,8 +29,8 @@
   20            GPI35/AD1_7                       Potentiometer R2 / AD7
   21            GPIO32/AD1_4/T9                   Potentiometer R1 / AD4                                                               Pot 1 (R1)
   22            GPIO33/AD1_5/T8                   IMon/D33  monitor board current
-  23            GPIO25/AD2_8/DAC1                 SK6812 Smart LEDs / D25                                                              Limit switch
-  24            GPIO26/A2_9/DAC2                  Push Button PB2                                                                      PB2
+  23            GPIO25/AD2_8/DAC1                 SK6812 Smart LEDs / D25                                                              Smart LEDs
+  24            GPIO26/A2_9/DAC2                  Push Button PB2                                                                      Limit switch
   25            GPIO27/AD2_7/T7                   Push Button PB1                                                                      PB1
   26            GPOP14/AD2_6/T6/SD_CLK            Slide Switch S2a                                                                     Right Encoder, Channel A
   27            GPIO12/AD2_5/T5/SD_D2/            D12(has connections in both 5V and 3V areas)                                         Right Motor, Channel B
@@ -44,9 +44,8 @@
 //Pin assignments
 const int ciHeartbeatLED = 2;
 const int ciPB1 = 27;
-const int ciPB2 = 26;
 const int ciPot1 = 32;
-const int ciLimitSwitch = 25;
+const int ciLimitSwitch = 26;
 const int ciIRDetector = 16;
 const int ciMotorLeftA = 4;
 const int ciMotorLeftB = 18;
@@ -56,9 +55,11 @@ const int ciEncoderLeftA = 17;
 const int ciEncoderLeftB = 5;
 const int ciEncoderRightA = 14;
 const int ciEncoderRightB = 13;
+const int ciSmartLED = 25;
 
 #include <esp_task_wdt.h>
 
+#include <Adafruit_NeoPixel.h>
 #include <Math.h>
 #include "Motion.h";
 #include "MyWEBserver.h"
@@ -72,6 +73,7 @@ const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
 const int CR1_ciMotorRunTime = 1000;
 const long CR1_clDebounceDelay = 50;
+const long CR1_clReadTimeout = 480;
 
 unsigned char CR1_ucMainTimerCaseCore1;
 
@@ -81,6 +83,7 @@ uint32_t CR1_u32Temp;
 uint32_t CR1_u32Avg;
 
 unsigned long CR1_ulLastDebounceTime;
+unsigned long CR1_ulLastByteTime;
 
 unsigned long CR1_ulMainTimerPrevious;
 unsigned long CR1_ulMainTimerNow;
@@ -96,9 +99,22 @@ boolean btHeartbeat = true;
 boolean btRun = false;
 int iButtonState;
 int iLastButtonState = HIGH;
+int iIncomingByte = 0;
+
+// Declare our SK6812 SMART LED object:
+Adafruit_NeoPixel SmartLEDs(2, 25, NEO_GRB + NEO_KHZ400);
+// Argument 1 = Number of LEDs (pixels) in use
+// Argument 2 = ESP32 pin number 
+// Argument 3 = Pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
 void setup() {
-   Serial.begin(115200);
+   Serial.begin(115200); 
+   Serial2.begin(2400, SERIAL_8N1, ciIRDetector);  // IRDetector on RX2 receiving 8-bit words at 2400 baud
    
    Core_ZEROInit();
 
@@ -121,10 +137,12 @@ void setup() {
    setupMotion();
    pinMode(ciHeartbeatLED, OUTPUT);
    pinMode(ciPB1, INPUT_PULLUP);
+   SmartLEDs.begin();                          // Initialize Smart LEDs object (required)
+   SmartLEDs.clear();                          // Set all pixel colours to off
+   SmartLEDs.show();                           // Send the updated pixel colours to the hardware
 }
 void loop()
 {
-
   //WSVR_BreakPoint(1);
  
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
@@ -150,6 +168,27 @@ void loop()
  }
  iLastButtonState = iButtonValue;             // store button state
  
+ if (Serial2.available() > 0) {               // check for incoming data
+    iIncomingByte = Serial2.read();           // read the incoming byte
+// Serial.println(iIncomingByte, HEX);        // uncomment to output received character
+    CR1_ulLastByteTime = millis();            // capture time last byte was received
+ }
+ else
+ {
+    // check to see if elapsed time exceeds allowable timeout
+    if (millis() - CR1_ulLastByteTime > CR1_clReadTimeout) {
+      iIncomingByte = 0;                      // if so, clear incoming byte
+    }
+ }
+
+ if (iIncomingByte == 0x55) {                 // if proper character is seen
+   SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
+ }
+ else {                                       // otherwise
+   SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
+ }
+ SmartLEDs.show();                            // send updated colour to LEDs
+  
  CR1_ulMainTimerNow = micros();
  if((CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer) && btRun)
  {
@@ -157,9 +196,9 @@ void loop()
    WDT_ucCaseIndexCore0 = CR0_ucMainTimerCaseCore0;
    
    CR1_ulMainTimerPrevious = CR1_ulMainTimerNow;
- 
-  switch(CR1_ucMainTimerCaseCore1)  //full switch run through is 1mS
-  {
+    
+   switch(CR1_ucMainTimerCaseCore1)  //full switch run through is 1mS
+   {
     //###############################################################################
     case 0: 
     {
