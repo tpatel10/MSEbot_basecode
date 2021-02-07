@@ -70,7 +70,6 @@ const int ciSmartLED = 25;
 
 void loopWEBServerButtonresponce(void);
 
-
 const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
 const int CR1_ciMotorRunTime = 1000;
@@ -174,7 +173,7 @@ void loop()
  iLastButtonState = iButtonValue;             // store button state
  
  if (Serial2.available() > 0) {               // check for incoming data
-    CR1_ui8IRDatum = Serial2.read();           // read the incoming byte
+    CR1_ui8IRDatum = Serial2.read();          // read the incoming byte
 // Serial.println(iIncomingByte, HEX);        // uncomment to output received character
     CR1_ulLastByteTime = millis();            // capture time last byte was received
  }
@@ -182,11 +181,11 @@ void loop()
  {
     // check to see if elapsed time exceeds allowable timeout
     if (millis() - CR1_ulLastByteTime > CR1_clReadTimeout) {
-      CR1_ui8IRDatum = 0;                      // if so, clear incoming byte
+      CR1_ui8IRDatum = 0;                     // if so, clear incoming byte
     }
  }
 
- if (CR1_ui8IRDatum == 0x55) {                 // if proper character is seen
+ if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
    SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
  }
  else {                                       // otherwise
@@ -290,13 +289,10 @@ void loop()
     //###############################################################################
     case 1: 
     {
-   
       //read pot 1 for motor speeds 
-      CR1_ui8WheelSpeed = analogRead(ciPot1) >> 4;
-     
+      CR1_ui8WheelSpeed = analogRead(ciPot1) >> 4;  // drop 4 least significant bits (12-bit -> 8-bit)
       
       CR1_ucMainTimerCaseCore1 = 2;
-    
       break;
     }
     //###############################################################################
