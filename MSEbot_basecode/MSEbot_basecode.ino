@@ -74,11 +74,12 @@ const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
 const int CR1_ciMotorRunTime = 1000;
 const long CR1_clDebounceDelay = 50;
-
-uint8_t CR1_ui8WheelSpeed;
+const long CR1_clReadTimeout = 480;
 
 unsigned char CR1_ucMainTimerCaseCore1;
+
 uint8_t CR1_ui8IRDatum;
+uint8_t CR1_ui8WheelSpeed;
 
 uint32_t CR1_u32Now;
 uint32_t CR1_u32Last;
