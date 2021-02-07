@@ -39,13 +39,12 @@
   30            VIN                               PWR 5V t 7V                                                                          PWR 5V to 7V
 */
 
-#include "0_Core_Zero.h"
 
 //Pin assignments
 const int ciHeartbeatLED = 2;
-const int ciPB1 = 27;
+const int ciPB1 = 27;     
 const int ciPB2 = 26;
-const int ciPot1 = 32;
+const int ciPot1 = A4;    //GPIO 32  - when JP2 has jumper installed Analog pin AD4 is connected to Poteniometer R1
 const int ciLimitSwitch = 25;
 const int ciIRDetector = 16;
 const int ciMotorLeftA = 4;
@@ -56,6 +55,9 @@ const int ciEncoderLeftA = 17;
 const int ciEncoderLeftB = 5;
 const int ciEncoderRightA = 14;
 const int ciEncoderRightB = 13;
+
+
+#include "0_Core_Zero.h"
 
 #include <esp_task_wdt.h>
 
@@ -73,7 +75,10 @@ const int CR1_ciHeartbeatInterval = 500;
 const int CR1_ciMotorRunTime = 1000;
 const long CR1_clDebounceDelay = 50;
 
+uint8_t CR1_ui8WheelSpeed;
+
 unsigned char CR1_ucMainTimerCaseCore1;
+uint8_t CR1_ui8IRDatum;
 
 uint32_t CR1_u32Now;
 uint32_t CR1_u32Last;
@@ -99,6 +104,8 @@ int iLastButtonState = HIGH;
 
 void setup() {
    Serial.begin(115200);
+    Serial2.begin(2400,SERIAL_8N1, ciIRDetector);
+
    
    Core_ZEROInit();
 
@@ -126,7 +133,11 @@ void loop()
 {
 
   //WSVR_BreakPoint(1);
- 
+  while (Serial2.available() > 0)
+  {
+    CR1_ui8IRDatum = Serial2.read();
+  }
+   
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
   if (iButtonValue != iLastButtonState) {      // if value has changed
      CR1_ulLastDebounceTime = millis();        // reset the debouncing timer
@@ -139,6 +150,7 @@ void loop()
      // only toggle the run condition if the new button state is LOW
      if (iButtonState == LOW) {
        btRun = !btRun;
+        Serial.println(btRun);
        // if stopping, reset motor states and stop motors
        if(!btRun) {
           ucMotorStateIndex = 0; 
@@ -151,7 +163,7 @@ void loop()
  iLastButtonState = iButtonValue;             // store button state
  
  CR1_ulMainTimerNow = micros();
- if((CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer) && btRun)
+ if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)
  {
    WDT_ResetCore1(); 
    WDT_ucCaseIndexCore0 = CR0_ucMainTimerCaseCore0;
@@ -163,77 +175,81 @@ void loop()
     //###############################################################################
     case 0: 
     {
-      CR1_ulMotorTimerNow = millis();
-      if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
-      {   
-       CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
-       switch(ucMotorStateIndex)
-       {
-        case 0:
-        {
-          ucMotorStateIndex = 1;
-          ucMotorState = 0;
-          move(0);
-          break;
+      
+      if(btRun)
+      {
+       CR1_ulMotorTimerNow = millis();
+       if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
+       {   
+         CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
+         switch(ucMotorStateIndex)
+         {
+          case 0:
+          {
+            ucMotorStateIndex = 1;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 1:
+          {
+            ucMotorStateIndex = 2;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 2:
+          {
+            ucMotorStateIndex = 3;
+            ucMotorState = 1;   //forward
+            move(CR1_ui8WheelSpeed);
+            break;
+          }
+           case 3:
+          {
+            ucMotorStateIndex = 4;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 4:
+          {
+            ucMotorStateIndex = 5;
+            ucMotorState = 2;  //left
+            move(0);
+            break;
+          }
+           case 5:
+          {
+            ucMotorStateIndex = 6;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 6:
+          {
+            ucMotorStateIndex = 7;
+            ucMotorState = 3;  //right
+            move(0);
+            break;
+          }
+           case 7:
+          {
+            ucMotorStateIndex = 8;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 8:
+          {
+            ucMotorStateIndex = 0;
+            ucMotorState = 4;  //reverse
+            move(CR1_ui8WheelSpeed);
+            break;
+          }
+           
+         }
         }
-         case 1:
-        {
-          ucMotorStateIndex = 2;
-          ucMotorState = 0;
-          move(0);
-          break;
-        }
-         case 2:
-        {
-          ucMotorStateIndex = 3;
-          ucMotorState = 1;
-          move(0);
-          break;
-        }
-         case 3:
-        {
-          ucMotorStateIndex = 4;
-          ucMotorState = 0;
-          move(0);
-          break;
-        }
-         case 4:
-        {
-          ucMotorStateIndex = 5;
-          ucMotorState = 2;
-          move(0);
-          break;
-        }
-         case 5:
-        {
-          ucMotorStateIndex = 6;
-          ucMotorState = 0;
-          move(0);
-          break;
-        }
-         case 6:
-        {
-          ucMotorStateIndex = 7;
-          ucMotorState = 3;
-          move(0);
-          break;
-        }
-         case 7:
-        {
-          ucMotorStateIndex = 8;
-          ucMotorState = 0;
-          move(0);
-          break;
-        }
-         case 8:
-        {
-          ucMotorStateIndex = 0;
-          ucMotorState = 4;
-          move(0);
-          break;
-        }
-         
-       }
       }
       CR1_ucMainTimerCaseCore1 = 1;
       
@@ -243,7 +259,10 @@ void loop()
     case 1: 
     {
    
-    
+      //read pot 1 for motor speeds 
+      CR1_ui8WheelSpeed = analogRead(ciPot1) >> 4;
+     
+      
       CR1_ucMainTimerCaseCore1 = 2;
     
       break;
@@ -251,8 +270,9 @@ void loop()
     //###############################################################################
     case 2: 
     {
-      
-   
+      //average the encoder tick times
+      ENC_Averaging();
+
       CR1_ucMainTimerCaseCore1 = 3;
       break;
     }
@@ -279,7 +299,7 @@ void loop()
       break;
     }
     //###############################################################################
-    case 6: //LCD Display
+    case 6:
     {
   
     
