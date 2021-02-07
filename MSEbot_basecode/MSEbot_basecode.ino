@@ -43,9 +43,9 @@
 //Pin assignments
 const int ciHeartbeatLED = 2;
 const int ciPB1 = 27;     
-const int ciPB2 = 26;
+const int ciPB2 = 26;      
 const int ciPot1 = A4;    //GPIO 32  - when JP2 has jumper installed Analog pin AD4 is connected to Poteniometer R1
-const int ciLimitSwitch = 25;
+const int ciLimitSwitch = 26;
 const int ciIRDetector = 16;
 const int ciMotorLeftA = 4;
 const int ciMotorLeftB = 18;
@@ -77,6 +77,7 @@ const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 480;
 
 unsigned char CR1_ucMainTimerCaseCore1;
+ uint8_t CR1_ui8LimitSwitch;
 
 uint8_t CR1_ui8IRDatum;
 uint8_t CR1_ui8WheelSpeed;
@@ -129,6 +130,7 @@ void setup() {
    setupMotion();
    pinMode(ciHeartbeatLED, OUTPUT);
    pinMode(ciPB1, INPUT_PULLUP);
+   pinMode(ciLimitSwitch, INPUT_PULLUP);
 }
 void loop()
 {
@@ -149,19 +151,32 @@ void loop()
     iButtonState = iButtonValue;               // update current button state
 
      // only toggle the run condition if the new button state is LOW
-     if (iButtonState == LOW) {
+     if (iButtonState == LOW)
+     {
+       ENC_ClearLeftOdometer();
+       ENC_ClearRightOdometer();
        btRun = !btRun;
         Serial.println(btRun);
        // if stopping, reset motor states and stop motors
-       if(!btRun) {
+       if(!btRun)
+       {
           ucMotorStateIndex = 0; 
           ucMotorState = 0;
           move(0);
        }
+      
      }
    }
  }
  iLastButtonState = iButtonValue;             // store button state
+
+ if(!digitalRead(ciLimitSwitch))
+ {
+  btRun = 0;//if limit switch is pressed stop bot
+  ucMotorStateIndex = 0;
+  ucMotorState = 0;
+  move(0);
+ }
  
  CR1_ulMainTimerNow = micros();
  if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)

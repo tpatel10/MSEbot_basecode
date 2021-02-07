@@ -32,8 +32,8 @@ void setupMotion (void)
   dManualSpeed = 0;
   dForwardSpeed = 255;
   dReverseSpeed = 250;
-  dLeftSpeed = 200;
-  dRightSpeed = 200
+  dLeftSpeed = 170;
+  dRightSpeed = 170
   ;
   
   //setup PWM for motors

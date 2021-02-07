@@ -276,10 +276,16 @@ int32_t ENC_Averaging()
 }
 
 
+void ENC_ClearLeftOdometer()
+{
+  ENC_vi32LeftOdometer = 0;
+}
 
 
-
-
+void ENC_ClearRightOdometer()
+{
+  ENC_vi32RightOdometer = 0;
+}
 
 
 
