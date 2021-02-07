@@ -18,79 +18,85 @@ usage
 #define BREAKPOINT_H 1
 
 //-----------------------------------------------------------
-//Column 1
+//Row 1
  
 #define WATCH_VARIABLE_1_NAME "uiTestCounter;LL1;0;UL1;65535" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
 #define WATCH_VARIABLE_1_TYPE unsigned int
 #define WATCH_VARIABLE_1 uiTestCounter
 // 
-//#define WATCH_VARIABLE_2_NAME "bTestCounter"
-//#define WATCH_VARIABLE_2_TYPE boolean
-//#define WATCH_VARIABLE_2 bTestCounter
+#define WATCH_VARIABLE_2_NAME "CR1_ui8WheelSpeed"
+#define WATCH_VARIABLE_2_TYPE uint8_t
+#define WATCH_VARIABLE_2 CR1_ui8WheelSpeed
 ////
-//#define WATCH_VARIABLE_3_NAME "fTestCounter;LL2;-500;UL2;500"
-//#define WATCH_VARIABLE_3_TYPE float
-//#define WATCH_VARIABLE_3 fTestCounter
+#define WATCH_VARIABLE_3_NAME "ENC_vi32RightOdometer"
+#define WATCH_VARIABLE_3_TYPE volatile int32_t
+#define WATCH_VARIABLE_3 ENC_vi32RightOdometer
+//
+#define WATCH_VARIABLE_4_NAME "ENC_vi32LeftOdometer"
+#define WATCH_VARIABLE_4_TYPE volatile int32_t
+#define WATCH_VARIABLE_4 ENC_vi32LeftOdometer
 
-//#define WATCH_VARIABLE_4_NAME ""
-//#define WATCH_VARIABLE_4_TYPE unsigned int
-//#define WATCH_VARIABLE_4 
-//
-//#define WATCH_VARIABLE_5_NAME ""
-//#define WATCH_VARIABLE_5_TYPE unsigned int
-//#define WATCH_VARIABLE_5 
-//
 ////-----------------------------------------------------------
-////Column 2
+////Row 2
 
-//#define WATCH_VARIABLE_6_NAME ""
-//#define WATCH_VARIABLE_6_TYPE unsigned int
-//#define WATCH_VARIABLE_6 
-// 
-//#define WATCH_VARIABLE_7_NAME ""
-//#define WATCH_VARIABLE_7_TYPE unsigned int
-//#define WATCH_VARIABLE_7 
-//
-//#define WATCH_VARIABLE_8_NAME ""
-//#define WATCH_VARIABLE_8_TYPE unsigned int
-//#define WATCH_VARIABLE_8 
-//
-//#define WATCH_VARIABLE_9_NAME ""
-//#define WATCH_VARIABLE_9_TYPE unsigned int
-//#define WATCH_VARIABLE_9 
-//
-//#define WATCH_VARIABLE_10_NAME ""
-//#define WATCH_VARIABLE_10_TYPE unsigned int
-//#define WATCH_VARIABLE_10 
-//
+#define WATCH_VARIABLE_5_NAME "ENC_vui16LeftEncoderAMissed"
+#define WATCH_VARIABLE_5_TYPE volatile uint16_t
+#define WATCH_VARIABLE_5 ENC_vui16LeftEncoderAMissed
+ 
+#define WATCH_VARIABLE_6_NAME "ENC_vui16LeftEncoderBMissed"
+#define WATCH_VARIABLE_6_TYPE  volatile uint16_t
+#define WATCH_VARIABLE_6 ENC_vui16LeftEncoderBMissed
+
+#define WATCH_VARIABLE_7_NAME "ENC_vui16RightEncoderAMissed"
+#define WATCH_VARIABLE_7_TYPE  volatile uint16_t
+#define WATCH_VARIABLE_7 ENC_vui16RightEncoderAMissed
+
+#define WATCH_VARIABLE_8_NAME "ENC_vui16RightEncoderBMissed"
+#define WATCH_VARIABLE_8_TYPE  volatile uint16_t
+#define WATCH_VARIABLE_8 ENC_vui16RightEncoderBMissed
+
 ////-----------------------------------------------------------
-////Column 3
-//#define WATCH_VARIABLE_11_NAME ""
-//#define WATCH_VARIABLE_11_TYPE unsigned int
-//#define WATCH_VARIABLE_11
-// 
-//#define WATCH_VARIABLE_12_NAME ""
-//#define WATCH_VARIABLE_12_TYPE unsigned int
-//#define WATCH_VARIABLE_12 
-//
+////Row 3
+
+
+#define WATCH_VARIABLE_9_NAME "ENC_i32LeftEncoderAAveTime"
+#define WATCH_VARIABLE_9_TYPE int32_t
+#define WATCH_VARIABLE_9 ENC_i32LeftEncoderAAveTime
+ 
+#define WATCH_VARIABLE_10_NAME "ENC_i32LeftEncoderBAveTime"
+#define WATCH_VARIABLE_10_TYPE int32_t
+#define WATCH_VARIABLE_10 ENC_i32LeftEncoderBAveTime
+
+#define WATCH_VARIABLE_11_NAME "ENC_i32RightEncoderAAveTime"
+#define WATCH_VARIABLE_11_TYPE int32_t
+#define WATCH_VARIABLE_11 ENC_i32RightEncoderAAveTime
+
+#define WATCH_VARIABLE_12_NAME "ENC_i32RightEncoderBAveTime"
+#define WATCH_VARIABLE_12_TYPE int32_t
+#define WATCH_VARIABLE_12 ENC_i32RightEncoderBAveTime
+
+////-----------------------------------------------------------
+////Row 4
 //#define WATCH_VARIABLE_13_NAME ""
 //#define WATCH_VARIABLE_13_TYPE unsigned int
 //#define WATCH_VARIABLE_13 
 //
+
 //#define WATCH_VARIABLE_14_NAME ""
 //#define WATCH_VARIABLE_14_TYPE unsigned int
-//#define WATCH_VARIABLE_14 
-//
+//#define WATCH_VARIABLE_14
+
 //#define WATCH_VARIABLE_15_NAME ""
 //#define WATCH_VARIABLE_15_TYPE unsigned int
 //#define WATCH_VARIABLE_15 
 //
-////-----------------------------------------------------------
-////Column 4
+
 //#define WATCH_VARIABLE_16_NAME ""
 //#define WATCH_VARIABLE_16_TYPE unsigned int
 //#define WATCH_VARIABLE_16
 // 
+////-----------------------------------------------------------
+////Row 5
 //#define WATCH_VARIABLE_17_NAME ""
 //#define WATCH_VARIABLE_17_TYPE unsigned int
 //#define WATCH_VARIABLE_17 
@@ -103,9 +109,9 @@ usage
 //#define WATCH_VARIABLE_19_TYPE unsigned int
 //#define WATCH_VARIABLE_19 
 //
-//#define WATCH_VARIABLE_20_NAME ""
-//#define WATCH_VARIABLE_20_TYPE unsigned int
-//#define WATCH_VARIABLE_20 
+//#define WATCH_VARIABLE_20_NAME "fTestCounter;LL2;-500;UL2;500"
+//#define WATCH_VARIABLE_20_TYPE float
+//#define WATCH_VARIABLE_20 fTestCounter
 
 
 #include "MyWEBserver.h"

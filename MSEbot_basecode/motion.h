@@ -1,4 +1,15 @@
+/*
+ Western Engineering base code
+2020 05 13 E J Porter
 
+ Dual Motor driver controller implement
+  
+ */
+
+ #ifndef MOTION_H
+  #define MOTION_H 1
+
+//---------------------------------------------------------------------------
 
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
@@ -19,7 +30,7 @@ void setupMotion (void)
 {
 	
   dManualSpeed = 0;
-  dForwardSpeed = 250;
+  dForwardSpeed = 255;
   dReverseSpeed = 250;
   dLeftSpeed = 200;
   dRightSpeed = 200
@@ -52,13 +63,14 @@ void setupMotion (void)
 }
 
 
-void move(double dspeed)
+void move(uint8_t ui8speed)
 {
     int  iPrintOnce;
       
    
      switch(ucMotorState)
       {
+        //Stop
         case 0:
         {
           ledcWrite(2,0);
@@ -70,74 +82,77 @@ void move(double dspeed)
            {
             iPrintOnce = 0;
             Serial.print(F("stop "));
-            Serial.println(dspeed);
+            Serial.println(ui8speed);
           }
           break;
         }
       
-      
+        //forwards
         case 1:
         {
-          dspeed = dForwardSpeed;
+          //ui8speed = dForwardSpeed;
           ledcWrite(2,0);
-          ledcWrite(1,dspeed);
+          ledcWrite(1,ui8speed);
           ledcWrite(4,0);
-          ledcWrite(3,dspeed);
+          ledcWrite(3,ui8speed);
           //ucWorkingButtonState = 9;
           if(iPrintOnce != 1)
            {
             iPrintOnce = 1;
             Serial.print(F("Forward "));
-            Serial.println(dspeed);
+            Serial.println(ui8speed);
            }
           break;
         }
+        //Left
         case 2:
         {
-          dspeed = dLeftSpeed;
+          ui8speed = dLeftSpeed;
           ledcWrite(2,0);
-          ledcWrite(1,dspeed);
+          ledcWrite(1,ui8speed);
           ledcWrite(3,0);
-          ledcWrite(4,dspeed);
+          ledcWrite(4,ui8speed);
          //ucWorkingButtonState = 9;
           if(iPrintOnce != 3)
            {
             iPrintOnce = 3;
             Serial.print(F("Left "));
-            Serial.println(dspeed);
+            Serial.println(ui8speed);
            }
         
           break;
         }
+        //Right
         case 3:
         {
-          dspeed = dRightSpeed;
+          ui8speed = dRightSpeed;
           ledcWrite(1,0);
-          ledcWrite(2,dspeed);
+          ledcWrite(2,ui8speed);
           ledcWrite(4,0);
-          ledcWrite(3,dspeed);
+          ledcWrite(3,ui8speed);
           // ucWorkingButtonState = 9;
           if(iPrintOnce != 4)
            {
             iPrintOnce = 4;
             Serial.print(F("Right "));
-            Serial.println(dspeed);
+            Serial.println(ui8speed);
            }
           break;
         }
+        //Reverse
         case 4:
         {
-           dspeed = dReverseSpeed;
+          // ui8speed = dReverseSpeed;
           ledcWrite(1,0);
-          ledcWrite(2,dspeed);
+          ledcWrite(2,ui8speed);
           ledcWrite(3,0);
-          ledcWrite(4,dspeed);
+          ledcWrite(4,ui8speed);
          // ucWorkingButtonState = 9;
           if(iPrintOnce != 2)
            {
             iPrintOnce = 2;
             Serial.print(F("Reverse "));
-            Serial.println(dspeed);
+            Serial.println(ui8speed);
            }
           break;
         }
@@ -149,3 +164,6 @@ void move(double dspeed)
    
  
 }
+
+
+#endif

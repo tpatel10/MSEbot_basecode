@@ -10,7 +10,7 @@ Western Engineering base code
 #ifndef CORE_ZERO_H
 #define CORE_ZERO_H 1
 
-
+#include "Encoder.h"
 #include "MyWEBserver.h"
 #include "BreakPoint.h"
 #include "WDT.h";
@@ -81,7 +81,7 @@ void Core_ZeroCode( void * pvParameters )
    WDT_vfFastWDTWarningCore0[9] = 0;
    WDT_ResetCore0(); 
    
-   
+   ENC_Init();
   //loop function for core 0
   //-------------------------------------------------------------------------------------------
   for(;;)
