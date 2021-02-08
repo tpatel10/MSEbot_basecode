@@ -163,9 +163,9 @@ void loop()
         Serial.println(btRun);
        // if stopping, reset run state and stop motors
        if(!btRun) {
-          CR1_ucRunState = 0; 
+          ucMotorStateIndex = 0; 
           ucMotorState = 0;
-          move(0,0,0);
+          move(0);
        }
      }
    }
@@ -184,7 +184,6 @@ void loop()
       CR1_ui8IRDatum = 0;                     // if so, clear incoming byte
     }
  }
-
  
  CR1_ulMainTimerNow = micros();
  if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)
@@ -208,74 +207,76 @@ void loop()
             CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
             switch(ucMotorStateIndex)
             {
-            case 0:
-            {
-               ucMotorStateIndex = 1;
-               ucMotorState = 0;
-               move(0);
-               break;
-            }
-            case 1:
-            {
-               ucMotorStateIndex = 2;
-               ucMotorState = 0;
-               move(0);
-               break;
-            }
-            case 2:
-            {
-               ucMotorStateIndex = 3;
-               ucMotorState = 1;
-               move(0);
-               break;
-            }
-            case 3:
-            {
-               ucMotorStateIndex = 4;
-               ucMotorState = 0;
-               move(0);
-               break;
-            }
-            case 4:
-            {
-               ucMotorStateIndex = 5;
-               ucMotorState = 2;
-               move(0);
-               break;
-            }
-            case 5:
-            {
-               ucMotorStateIndex = 6;
-               ucMotorState = 0;
-               move(0);
-               break;
-            }
-            case 6:
-            {
-               ucMotorStateIndex = 7;
-               ucMotorState = 3;
-               move(0);
-               break;
-            }
-            case 7:
-            {
-               ucMotorStateIndex = 8;
-               ucMotorState = 0;
-               move(0);
-               break;
-            }
-            case 8:
-            {
-               ucMotorStateIndex = 0;
-               ucMotorState = 4;
-               move(0);
-               break;
-            }
-         }
-      }
-      CR1_ucMainTimerCaseCore1 = 1;
-      break;
-    }
+               case 0:
+               {
+                  ucMotorStateIndex = 1;
+                  ucMotorState = 0;
+                  move(0);
+                  break;
+               }
+               case 1:
+               {
+                  ucMotorStateIndex = 2;
+                  ucMotorState = 0;
+                  move(0);
+                  break;
+               }
+               case 2:
+               {
+                  ucMotorStateIndex = 3;
+                  ucMotorState = 1;
+                  move(CR1_ui8WheelSpeed);
+                  break;
+               }
+               case 3:
+               {
+                  ucMotorStateIndex = 4;
+                  ucMotorState = 0;
+                  move(0);
+                  break;
+               }
+               case 4:
+               {
+                  ucMotorStateIndex = 5;
+                  ucMotorState = 2;
+                  move(CR1_ui8WheelSpeed);
+                  break;
+               }
+               case 5:
+               {
+                  ucMotorStateIndex = 6;
+                  ucMotorState = 0;
+                  move(0);
+                  break;
+               }
+               case 6:
+               {
+                  ucMotorStateIndex = 7;
+                  ucMotorState = 3;
+                  move(CR1_ui8WheelSpeed);
+                  break;
+               }
+               case 7:
+               {
+                  ucMotorStateIndex = 8;
+                  ucMotorState = 0;
+                  move(0);
+                  break;
+               }
+               case 8:
+               {
+                  ucMotorStateIndex = 0;
+                  ucMotorState = 4;
+                  move(CR1_ui8WheelSpeed);
+                  break;
+               }
+           }
+       }
+       CR1_ucMainTimerCaseCore1 = 1;
+       break;
+     }
+  }
+    
     //###############################################################################
     case 1: 
     {
@@ -368,5 +369,6 @@ void loop()
     btHeartbeat = !btHeartbeat;
     digitalWrite(ciHeartbeatLED, btHeartbeat);
  }
+
 }
 

@@ -61,7 +61,7 @@ void move(uint8_t ui8speed)
           ledcWrite(2,255);
           ledcWrite(1,255);
           ledcWrite(4,255);
-          ledcWrite(3,0);
+          ledcWrite(3,255);
         //ucWorkingButtonState = 9;
           if(iPrintOnce != 0)
            {
