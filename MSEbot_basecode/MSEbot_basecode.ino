@@ -139,6 +139,7 @@ void loop()
   while (Serial2.available() > 0)
   {
     CR1_ui8IRDatum = Serial2.read();
+    //Serial.println(CR1_ui8IRDatum,HEX);
   }
    
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
