@@ -14,7 +14,6 @@
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
 
-
 unsigned char ucMotorState = 0;
 
 double dManualSpeed;
@@ -23,18 +22,14 @@ double dReverseSpeed;
 double dLeftSpeed;
 double dRightSpeed;
 
-
-
-
 void setupMotion (void)
 {
 	
   dManualSpeed = 0;
-  dForwardSpeed = 255;
+  dForwardSpeed = 250;  // max 255; min ~150 before motor stall
   dReverseSpeed = 250;
   dLeftSpeed = 200;
-  dRightSpeed = 200
-  ;
+  dRightSpeed = 200;
   
   //setup PWM for motors
   ledcAttachPin(ciMotorLeftA, 1); // assign Motors pins to channels
@@ -42,40 +37,30 @@ void setupMotion (void)
   ledcAttachPin(ciMotorRightA, 3);
   ledcAttachPin(ciMotorRightB, 4);
 
-    // Initialize channels 
+  // Initialize channels 
   // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
   // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
   ledcSetup(1, 20000, 8); // 20mS PWM, 8-bit resolution
   ledcSetup(2, 20000, 8);
   ledcSetup(3, 20000, 8);
   ledcSetup(4, 20000, 8);
-  //uiMotorSpeedLeft = uiStop;
-  //uiMotorSpeedRight = uiStop;
-  //uiMotorCommandLeft = uiStop;
-  //uiMotorCommandRight = uiStop;
-
-  
-	
+ 	
    ucMotion_Direction = 0;
    ucMotion_Speed = 0;
-
-	
 }
-
 
 void move(uint8_t ui8speed)
 {
     int  iPrintOnce;
-      
-   
+
      switch(ucMotorState)
       {
         //Stop
         case 0:
         {
-          ledcWrite(2,0);
-          ledcWrite(1,0);
-          ledcWrite(4,0);
+          ledcWrite(2,255);
+          ledcWrite(1,255);
+          ledcWrite(4,255);
           ledcWrite(3,0);
         //ucWorkingButtonState = 9;
           if(iPrintOnce != 0)
@@ -87,7 +72,7 @@ void move(uint8_t ui8speed)
           break;
         }
       
-        //forwards
+        //Forward
         case 1:
         {
           //ui8speed = dForwardSpeed;
@@ -119,7 +104,6 @@ void move(uint8_t ui8speed)
             Serial.print(F("Left "));
             Serial.println(ui8speed);
            }
-        
           break;
         }
         //Right
@@ -156,14 +140,7 @@ void move(uint8_t ui8speed)
            }
           break;
         }
-        
       }
-       
-       
-        
-   
- 
 }
-
 
 #endif
