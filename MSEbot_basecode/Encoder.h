@@ -13,10 +13,15 @@
 
 #include "Motion.h";
 
+ 
+
  volatile boolean ENC_btLeftEncoderADataFlag;
  volatile boolean ENC_btLeftEncoderBDataFlag;
  volatile boolean ENC_btRightEncoderADataFlag;
  volatile boolean ENC_btRightEncoderBDataFlag;
+
+ volatile boolean ENC_btLeftMotorRunningFlag;
+ volatile boolean ENC_btRightMotorRunningFlag;
 
  volatile uint16_t ENC_vui16LeftEncoderAMissed;
  volatile uint16_t ENC_vui16LeftEncoderBMissed;
@@ -41,6 +46,9 @@ uint16_t ENC_uiAlpha = 8196;
  volatile int32_t ENC_vi32LeftOdometer;
  volatile int32_t ENC_vi32RightOdometer;
 
+ volatile int32_t ENC_vi32LeftOdometerCompare;
+ volatile int32_t ENC_vi32RightOdometerCompare;
+
 void ENC_Calibrate()
 {
   
@@ -52,13 +60,37 @@ void ENC_Calibrate()
   
 }
 
+boolean ENC_ISMotorRunning()
+{
+  if((ENC_btLeftMotorRunningFlag) && (ENC_btLeftMotorRunningFlag))
+  {
+    return(1);
+  }
+  else
+  {
+     return(0);
+  }
+}
+
+void ENC_SetDistance(int32_t i32LeftDistance, int32_t i32RightDistance)
+{
+  
+   ENC_vi32LeftOdometerCompare = ENC_vi32LeftOdometer + i32LeftDistance;
+   ENC_vi32RightOdometerCompare = ENC_vi32RightOdometer + i32RightDistance;
+   ENC_btLeftMotorRunningFlag = true;
+   ENC_btRightMotorRunningFlag = true;
+}
+
 //Encoder interrupt service routines - entered every change in in encoder pin H-> L and L ->H
 //---------------------------------------------------------------------------------------------
 void IRAM_ATTR ENC_isrLeftA()
 {
   volatile int32_t ENCc_vi32LastTime;
   volatile int32_t ENCc_vi32ThisTime;
+
   
+  
+ // asm volatile("esync; rsr %0,ccount":"=a" (vui32test1)); // @ 240mHz clock each tick is ~4nS 
    // if the last interrupts data wasn't collected, count the miss
   if(ENC_btLeftEncoderADataFlag)
   {
@@ -80,6 +112,26 @@ void IRAM_ATTR ENC_isrLeftA()
   {
     ENC_vi32LeftOdometer += 1;
   }
+
+  
+  if(ENC_btLeftMotorRunningFlag)
+  {
+    if(ENC_vi32LeftOdometer == ENC_vi32LeftOdometerCompare)
+    {
+      ENC_btLeftMotorRunningFlag = false;
+      ENC_btRightMotorRunningFlag = false;
+      digitalWrite(ciMotorLeftA,HIGH);
+      digitalWrite(ciMotorLeftB,HIGH);
+      digitalWrite(ciMotorRightA,HIGH);
+      digitalWrite(ciMotorRightB,HIGH);
+      ledcWrite(2,255);
+      ledcWrite(1,255);  //stop with braking Left motor 
+      ledcWrite(3,255);
+      ledcWrite(4,255);  //stop with braking Right motor 
+    }
+    
+  }
+   //asm volatile("esync; rsr %0,ccount":"=a" (vui32test2)); // @ 240mHz clock each tick is ~4nS 
 }
 
 void IRAM_ATTR ENC_isrLeftB()
@@ -108,7 +160,23 @@ void IRAM_ATTR ENC_isrLeftB()
   {
     ENC_vi32LeftOdometer -= 1;
   }
-  
+  if(ENC_btLeftMotorRunningFlag)
+  {
+    if(ENC_vi32LeftOdometer == ENC_vi32LeftOdometerCompare)
+    {
+        ENC_btLeftMotorRunningFlag = false;
+      ENC_btRightMotorRunningFlag = false;
+      digitalWrite(ciMotorLeftA,HIGH);
+      digitalWrite(ciMotorLeftB,HIGH);
+      digitalWrite(ciMotorRightA,HIGH);
+      digitalWrite(ciMotorRightB,HIGH);
+      ledcWrite(2,255);
+      ledcWrite(1,255);  //stop with braking Left motor 
+      ledcWrite(3,255);
+      ledcWrite(4,255);  //stop with braking Right motor 
+    }
+    
+  }
 }
 
 void IRAM_ATTR ENC_isrRightA()
@@ -137,6 +205,23 @@ void IRAM_ATTR ENC_isrRightA()
   {
     ENC_vi32RightOdometer += 1;
   }
+  if(ENC_btRightMotorRunningFlag)
+  {
+    if(ENC_vi32RightOdometer == ENC_vi32RightOdometerCompare)
+    {
+        ENC_btLeftMotorRunningFlag = false;
+      ENC_btRightMotorRunningFlag = false;
+      digitalWrite(ciMotorLeftA,HIGH);
+      digitalWrite(ciMotorLeftB,HIGH);
+      digitalWrite(ciMotorRightA,HIGH);
+      digitalWrite(ciMotorRightB,HIGH);
+      ledcWrite(2,255);
+      ledcWrite(1,255);  //stop with braking Left motor 
+      ledcWrite(3,255);
+      ledcWrite(4,255);  //stop with braking Right motor 
+    }
+    
+  }
 }
 
 void IRAM_ATTR ENC_isrRightB()
@@ -144,6 +229,7 @@ void IRAM_ATTR ENC_isrRightB()
   volatile int32_t ENCc_vi32LastTime;
   volatile int32_t ENCc_vi32ThisTime;
 
+  
   // if the last interrupts data wasn't collected, count the miss
   if(ENC_btRightEncoderBDataFlag)
   {
@@ -165,6 +251,23 @@ void IRAM_ATTR ENC_isrRightB()
   {
     ENC_vi32RightOdometer -= 1;
   }
+  if(ENC_btRightMotorRunningFlag)
+  {
+    if(ENC_vi32RightOdometer == ENC_vi32RightOdometerCompare)
+    {
+       ENC_btLeftMotorRunningFlag = false;
+      ENC_btRightMotorRunningFlag = false;
+      digitalWrite(ciMotorLeftA,HIGH);
+      digitalWrite(ciMotorLeftB,HIGH);
+      digitalWrite(ciMotorRightA,HIGH);
+      digitalWrite(ciMotorRightB,HIGH);
+      ledcWrite(2,255);
+      ledcWrite(1,255);  //stop with braking Left motor 
+      ledcWrite(3,255);
+      ledcWrite(4,255);  //stop with braking Right motor  
+    }
+    
+  }
 }
 //---------------------------------------------------------------------------------------------
 
@@ -181,6 +284,9 @@ void ENC_Init()
   attachInterrupt(ciEncoderLeftB, ENC_isrLeftB, CHANGE);
   attachInterrupt(ciEncoderRightA, ENC_isrRightA, CHANGE);
   attachInterrupt(ciEncoderRightB, ENC_isrRightB, CHANGE);
+
+  ENC_btLeftMotorRunningFlag = false;
+  ENC_btRightMotorRunningFlag = false;
 
   //check to see if calibration is in eeprom and retreive
   
@@ -276,10 +382,16 @@ int32_t ENC_Averaging()
 }
 
 
+void ENC_ClearLeftOdometer()
+{
+  ENC_vi32LeftOdometer = 0;
+}
 
 
-
-
+void ENC_ClearRightOdometer()
+{
+  ENC_vi32RightOdometer = 0;
+}
 
 
 
