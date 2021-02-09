@@ -43,12 +43,8 @@
 //Pin assignments
 const int ciHeartbeatLED = 2;
 const int ciPB1 = 27;     
-<<<<<<< HEAD
 const int ciPB2 = 26;      
 const int ciPot1 = A4;    //GPIO 32  - when JP2 has jumper installed Analog pin AD4 is connected to Poteniometer R1
-=======
-const int ciPot1 = A4;              //GPIO 32  - when JP2 has jumper installed Analog pin AD4 is connected to Poteniometer R1
->>>>>>> 8755ce03a0e13831781e5379eda30c9fe1f0181e
 const int ciLimitSwitch = 26;
 const int ciIRDetector = 16;
 const int ciMotorLeftA = 4;
@@ -60,7 +56,12 @@ const int ciEncoderLeftB = 5;
 const int ciEncoderRightA = 14;
 const int ciEncoderRightB = 13;
 const int ciSmartLED = 25;
+const int ciStepperMotorDir = 22;
+const int ciStepperMotorStep = 21;
 
+
+volatile uint32_t vui32test1;
+volatile uint32_t vui32test2;
 
 #include "0_Core_Zero.h"
 
@@ -77,15 +78,24 @@ void loopWEBServerButtonresponce(void);
 
 const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
-const int CR1_ciMotorRunTime = 1000;
+const int CR1_ciMotorRunTime = 1250;
 const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 220;
+
+
+const uint8_t ci8RightTurn = 18;
+const uint8_t ci8LeftTurn = 17;
+
+
+boolean CR1_btStep;
 
 unsigned char CR1_ucMainTimerCaseCore1;
  uint8_t CR1_ui8LimitSwitch;
 
 uint8_t CR1_ui8IRDatum;
 uint8_t CR1_ui8WheelSpeed;
+uint8_t CR1_ui8LeftWheelSpeed;
+uint8_t CR1_ui8RightWheelSpeed;
 
 uint32_t CR1_u32Now;
 uint32_t CR1_u32Last;
@@ -97,6 +107,9 @@ unsigned long CR1_ulLastByteTime;
 
 unsigned long CR1_ulMainTimerPrevious;
 unsigned long CR1_ulMainTimerNow;
+
+unsigned long CR1_ulStepperMotorTimerPrevious;
+unsigned long CR1_ulStepperMotorTimerNow;
 
 unsigned long CR1_ulMotorTimerPrevious;
 unsigned long CR1_ulMotorTimerNow;
@@ -146,27 +159,42 @@ void setup() {
    setupMotion();
    pinMode(ciHeartbeatLED, OUTPUT);
    pinMode(ciPB1, INPUT_PULLUP);
-<<<<<<< HEAD
    pinMode(ciLimitSwitch, INPUT_PULLUP);
-=======
+
+   pinMode(ciStepperMotorDir, OUTPUT);
+   pinMode(ciStepperMotorStep, OUTPUT);  
+
    SmartLEDs.begin();                          // Initialize Smart LEDs object (required)
    SmartLEDs.clear();                          // Set all pixel colours to off
    SmartLEDs.show();                           // Send the updated pixel colours to the hardware
->>>>>>> 8755ce03a0e13831781e5379eda30c9fe1f0181e
+
+
+  CR1_ulStepperMotorTimerPrevious = micros();
 }
 void loop()
 {
   //WSVR_BreakPoint(1);
-<<<<<<< HEAD
+
+
+
+//  //stepper motor test
+// CR1_ulStepperMotorTimerNow = micros();
+// if(CR1_ulStepperMotorTimerNow - CR1_ulStepperMotorTimerPrevious >= 500)
+// {
+//     
+//   CR1_ulStepperMotorTimerPrevious = CR1_ulStepperMotorTimerNow;
+//   digitalWrite(ciStepperMotorDir,LOW);
+//   CR1_btStep ^= 1;
+//   digitalWrite(ciStepperMotorStep,CR1_btStep);
+// }    
+
   while (Serial2.available() > 0)
   {
     CR1_ui8IRDatum = Serial2.read();
     //Serial.println(CR1_ui8IRDatum,HEX);
   }
    
-=======
 
->>>>>>> 8755ce03a0e13831781e5379eda30c9fe1f0181e
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
   if (iButtonValue != iLastButtonState) {      // if value has changed
      CR1_ulLastDebounceTime = millis();        // reset the debouncing timer
@@ -217,14 +245,6 @@ void loop()
     }
  }
 
- if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
-   SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
- }
- else {                                       // otherwise
-   SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
- }
- SmartLEDs.show();                            // send updated colour to LEDs
-  
  CR1_ulMainTimerNow = micros();
  if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)
  {
@@ -256,61 +276,102 @@ void loop()
           }
            case 1:
           {
+            
+            ENC_SetDistance(116, 116);
+            ucMotorState = 1;   //forward
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
             ucMotorStateIndex = 2;
-            ucMotorState = 0;
-            move(0);
+                     
             break;
           }
            case 2:
           {
             ucMotorStateIndex = 3;
-            ucMotorState = 1;   //forward
-            move(CR1_ui8WheelSpeed);
-            break;
-          }
-           case 3:
-          {
-            ucMotorStateIndex = 4;
             ucMotorState = 0;
             move(0);
+            break;
+          }
+          case 3:
+          {
+             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            ucMotorStateIndex = 4;
+            ucMotorState = 2;  //left
+           
             break;
           }
            case 4:
           {
             ucMotorStateIndex = 5;
-            ucMotorState = 2;  //left
-            move(0);
-            break;
-          }
-           case 5:
-          {
-            ucMotorStateIndex = 6;
             ucMotorState = 0;
             move(0);
             break;
           }
-           case 6:
+         case 5:
+          {
+            ENC_SetDistance(ci8RightTurn,-(ci8RightTurn));
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            ucMotorStateIndex =  6;
+            ucMotorState = 3;  //right
+            
+            break;
+          }
+          case 6:
           {
             ucMotorStateIndex = 7;
-            ucMotorState = 3;  //right
+            ucMotorState = 0;
             move(0);
             break;
           }
            case 7:
           {
             ucMotorStateIndex = 8;
+            ucMotorState = 4;  //reverse
+            ENC_SetDistance(-125, -125);
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            
+            break;
+          }
+          case 8:
+          {
+            ucMotorStateIndex = 9;
             ucMotorState = 0;
             move(0);
             break;
           }
-           case 8:
+          case 9:
           {
-            ucMotorStateIndex = 0;
-            ucMotorState = 4;  //reverse
-            move(CR1_ui8WheelSpeed);
+            ENC_SetDistance(ci8RightTurn,-(ci8RightTurn));
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            ucMotorStateIndex = 10;
+            ucMotorState = 3;  //right
+            
             break;
           }
-           
+          case 10:
+          {
+            ucMotorStateIndex = 11;
+            ucMotorState = 0;
+            move(0);
+            break;
+          }
+           case 11:
+          {
+             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
+            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
+            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            ucMotorStateIndex = 0;
+            ucMotorState = 2;  //left
+            
+            break;
+          }
+        
+        
          }
         }
       }
@@ -339,7 +400,11 @@ void loop()
     //###############################################################################
     case 3: 
     {
-      
+      //move bot X number of odometer ticks
+      if(ENC_ISMotorRunning())
+      {
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+      }
       
       CR1_ucMainTimerCaseCore1 = 4;
       break;
@@ -354,7 +419,8 @@ void loop()
     //###############################################################################
     case 5: 
     {
-   
+      
+     
       CR1_ucMainTimerCaseCore1 = 6;
       break;
     }
@@ -369,7 +435,14 @@ void loop()
     //###############################################################################
     case 7: 
     {
-   
+       if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
+         SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
+       }
+       else {                                       // otherwise
+         SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
+       }
+       SmartLEDs.show();                            // send updated colour to LEDs
+          
       CR1_ucMainTimerCaseCore1 = 8;
       break;
     }
@@ -398,5 +471,6 @@ void loop()
     CR1_ulHeartbeatTimerPrevious = CR1_ulHeartbeatTimerNow;
     btHeartbeat = !btHeartbeat;
     digitalWrite(ciHeartbeatLED, btHeartbeat);
+   // Serial.println((vui32test2 - vui32test1)* 3 );
  }
 }

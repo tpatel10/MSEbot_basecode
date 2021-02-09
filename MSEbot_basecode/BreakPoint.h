@@ -77,14 +77,14 @@ usage
 
 ////-----------------------------------------------------------
 ////Row 4
-//#define WATCH_VARIABLE_13_NAME ""
-//#define WATCH_VARIABLE_13_TYPE unsigned int
-//#define WATCH_VARIABLE_13 
+#define WATCH_VARIABLE_13_NAME "ENC_vi32LeftOdometerCompare"
+#define WATCH_VARIABLE_13_TYPE volatile int32_t
+#define WATCH_VARIABLE_13 ENC_vi32LeftOdometerCompare
 //
 
-//#define WATCH_VARIABLE_14_NAME ""
-//#define WATCH_VARIABLE_14_TYPE unsigned int
-//#define WATCH_VARIABLE_14
+#define WATCH_VARIABLE_14_NAME "ENC_vi32RightOdometerCompare"
+#define WATCH_VARIABLE_14_TYPE volatile int32_t
+#define WATCH_VARIABLE_14 ENC_vi32RightOdometerCompare
 
 //#define WATCH_VARIABLE_15_NAME ""
 //#define WATCH_VARIABLE_15_TYPE unsigned int

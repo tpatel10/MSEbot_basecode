@@ -11,8 +11,17 @@
 
 //---------------------------------------------------------------------------
 
+#define DEBUGPRINT 1
+#define ACCELERATIONRATE 1;
+
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
+
+
+
+uint8_t ui8LeftWorkingSpeed;
+uint8_t ui8RightWorkingSpeed;
+
 
 
 unsigned char ucMotorState = 0;
@@ -63,27 +72,155 @@ void setupMotion (void)
 }
 
 
-void move(uint8_t ui8speed)
+void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
+{
+    int  iPrintOnce;
+      
+   
+     switch(ui8Direction)
+      {
+      
+      
+        //forward
+        case 1:
+        {
+            
+          if(ui8LeftWorkingSpeed >= ui8LeftSpeed)
+          {
+            ui8LeftWorkingSpeed = ui8LeftSpeed;
+          }
+          else
+          {
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          }
+          if(ui8RightWorkingSpeed >= ui8RightSpeed)
+          {
+            ui8RightWorkingSpeed = ui8RightSpeed;
+          }
+          else
+          {
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+          }
+          
+          ledcWrite(2,0);
+          ledcWrite(1,ui8LeftWorkingSpeed);
+          ledcWrite(4,0);
+          ledcWrite(3,ui8RightWorkingSpeed);
+          
+          break;
+        }
+        //Left
+        case 2:
+        {
+          if(ui8LeftWorkingSpeed >= ui8LeftSpeed)
+          {
+            ui8LeftWorkingSpeed = ui8LeftSpeed;
+          }
+          else
+          {
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          }
+          if(ui8RightWorkingSpeed >= ui8RightSpeed)
+          {
+            ui8RightWorkingSpeed = ui8RightSpeed;
+          }
+          else
+          {
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+          }
+         
+          ledcWrite(1,0);
+          ledcWrite(2,ui8LeftWorkingSpeed);
+          ledcWrite(4,0);
+          ledcWrite(3,ui8RightWorkingSpeed);
+        
+          break;
+        }
+        //Right
+        case 3:
+        {
+          if(ui8LeftWorkingSpeed >= ui8LeftSpeed)
+          {
+            ui8LeftWorkingSpeed = ui8LeftSpeed;
+          }
+          else
+          {
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          }
+          if(ui8RightWorkingSpeed >= ui8RightSpeed)
+          {
+            ui8RightWorkingSpeed = ui8RightSpeed;
+          }
+          else
+          {
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+          }
+         
+          ledcWrite(2,0);
+          ledcWrite(1,ui8LeftWorkingSpeed);
+          ledcWrite(3,0);
+          ledcWrite(4,ui8RightWorkingSpeed);
+       
+          break;
+        }
+        //Reverse
+        case 4:
+        {
+             
+          if(ui8LeftWorkingSpeed >= ui8LeftSpeed)
+          {
+            ui8LeftWorkingSpeed = ui8LeftSpeed;
+          }
+          else
+          {
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          }
+          if(ui8RightWorkingSpeed >= ui8RightSpeed)
+          {
+            ui8RightWorkingSpeed = ui8RightSpeed;
+          }
+          else
+          {
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+          }
+         
+          ledcWrite(1,0);
+          ledcWrite(2,ui8LeftWorkingSpeed);
+          ledcWrite(3,0);
+          ledcWrite(4,ui8RightWorkingSpeed);
+       
+          break;
+        }
+     
+        
+      }
+ }
+
+
+ void move(uint8_t ui8Speed)
 {
     int  iPrintOnce;
       
    
      switch(ucMotorState)
       {
-        //Stop
+        //Stop, coast mode
         case 0:
         {
+          //if 0 is put in both INs motors will coast stop 
           ledcWrite(2,0);
           ledcWrite(1,0);
           ledcWrite(4,0);
           ledcWrite(3,0);
         //ucWorkingButtonState = 9;
+      #ifdef DEBIGPRINT  
           if(iPrintOnce != 0)
            {
             iPrintOnce = 0;
-            Serial.print(F("stop "));
-            Serial.println(ui8speed);
+            Serial.print(F("stop-coasting"));
+            Serial.println(ui8Speed);
           }
+      #endif    
           break;
         }
       
@@ -92,51 +229,56 @@ void move(uint8_t ui8speed)
         {
           //ui8speed = dForwardSpeed;
           ledcWrite(2,0);
-          ledcWrite(1,ui8speed);
+          ledcWrite(1,ui8Speed);
           ledcWrite(4,0);
-          ledcWrite(3,ui8speed);
+          ledcWrite(3,ui8Speed);
           //ucWorkingButtonState = 9;
+        #ifdef DEBIGPRINT  
           if(iPrintOnce != 1)
            {
             iPrintOnce = 1;
             Serial.print(F("Forward "));
-            Serial.println(ui8speed);
+            Serial.println(ui8Speed);
            }
+         #endif   
           break;
         }
         //Left
         case 2:
         {
-          ui8speed = dLeftSpeed;
+          ui8Speed = dLeftSpeed;
           ledcWrite(2,0);
-          ledcWrite(1,ui8speed);
+          ledcWrite(1,ui8Speed);
           ledcWrite(3,0);
-          ledcWrite(4,ui8speed);
+          ledcWrite(4,ui8Speed);
          //ucWorkingButtonState = 9;
+         #ifdef DEBIGPRINT  
           if(iPrintOnce != 3)
            {
             iPrintOnce = 3;
             Serial.print(F("Left "));
-            Serial.println(ui8speed);
+            Serial.println(ui8Speed);
            }
-        
+         #endif 
           break;
         }
         //Right
         case 3:
         {
-          ui8speed = dRightSpeed;
+          ui8Speed = dRightSpeed;
           ledcWrite(1,0);
-          ledcWrite(2,ui8speed);
+          ledcWrite(2,ui8Speed);
           ledcWrite(4,0);
-          ledcWrite(3,ui8speed);
+          ledcWrite(3,ui8Speed);
           // ucWorkingButtonState = 9;
+          #ifdef DEBIGPRINT  
           if(iPrintOnce != 4)
            {
             iPrintOnce = 4;
             Serial.print(F("Right "));
-            Serial.println(ui8speed);
+            Serial.println(ui8Speed);
            }
+         #endif   
           break;
         }
         //Reverse
@@ -144,26 +286,45 @@ void move(uint8_t ui8speed)
         {
           // ui8speed = dReverseSpeed;
           ledcWrite(1,0);
-          ledcWrite(2,ui8speed);
+          ledcWrite(2,ui8Speed);
           ledcWrite(3,0);
-          ledcWrite(4,ui8speed);
+          ledcWrite(4,ui8Speed);
          // ucWorkingButtonState = 9;
+         #ifdef DEBIGPRINT  
           if(iPrintOnce != 2)
            {
             iPrintOnce = 2;
             Serial.print(F("Reverse "));
-            Serial.println(ui8speed);
+            Serial.println(ui8Speed);
            }
+         #endif  
+          break;
+        }
+        //Stop  braking mode
+        case 5:
+        {
+          //if 255 is put in both INs brakes will be applied 
+          ledcWrite(2,255);
+          ledcWrite(1,255);
+          ledcWrite(4,255);
+          ledcWrite(3,255);
+        //ucWorkingButtonState = 9;
+      #ifdef DEBIGPRINT  
+          if(iPrintOnce != 0)
+           {
+            iPrintOnce = 0;
+            Serial.print(F("stop-braking"));
+            Serial.println(ui8Speed);
+          }
+      #endif    
           break;
         }
         
       }
-       
-       
-        
-   
+
  
 }
+
 
 
 #endif
