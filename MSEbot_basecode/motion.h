@@ -17,8 +17,10 @@
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
 
-uint8_t ui8LeftWorkingSpeed;
-uint8_t ui8RightWorkingSpeed;
+const uint8_t cui8StartingSpeed = 140;
+
+uint8_t ui8LeftWorkingSpeed = cui8StartingSpeed;
+uint8_t ui8RightWorkingSpeed = cui8StartingSpeed;
 
 unsigned char ucMotorState = 0;
 
