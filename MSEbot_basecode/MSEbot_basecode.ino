@@ -59,7 +59,6 @@ const int ciSmartLED = 25;
 const int ciStepperMotorDir = 22;
 const int ciStepperMotorStep = 21;
 
-
 volatile uint32_t vui32test1;
 volatile uint32_t vui32test2;
 
@@ -82,15 +81,11 @@ const int CR1_ciMotorRunTime = 1250;
 const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 220;
 
-
 const uint8_t ci8RightTurn = 18;
 const uint8_t ci8LeftTurn = 17;
 
-
-boolean CR1_btStep;
-
 unsigned char CR1_ucMainTimerCaseCore1;
- uint8_t CR1_ui8LimitSwitch;
+uint8_t CR1_ui8LimitSwitch;
 
 uint8_t CR1_ui8IRDatum;
 uint8_t CR1_ui8WheelSpeed;
@@ -108,9 +103,6 @@ unsigned long CR1_ulLastByteTime;
 unsigned long CR1_ulMainTimerPrevious;
 unsigned long CR1_ulMainTimerNow;
 
-unsigned long CR1_ulStepperMotorTimerPrevious;
-unsigned long CR1_ulStepperMotorTimerNow;
-
 unsigned long CR1_ulMotorTimerPrevious;
 unsigned long CR1_ulMotorTimerNow;
 unsigned char ucMotorStateIndex = 0;
@@ -120,6 +112,7 @@ unsigned long CR1_ulHeartbeatTimerNow;
 
 boolean btHeartbeat = true;
 boolean btRun = false;
+boolean btToggle = true;
 int iButtonState;
 int iLastButtonState = HIGH;
 
@@ -161,39 +154,14 @@ void setup() {
    pinMode(ciPB1, INPUT_PULLUP);
    pinMode(ciLimitSwitch, INPUT_PULLUP);
 
-   pinMode(ciStepperMotorDir, OUTPUT);
-   pinMode(ciStepperMotorStep, OUTPUT);  
-
    SmartLEDs.begin();                          // Initialize Smart LEDs object (required)
    SmartLEDs.clear();                          // Set all pixel colours to off
    SmartLEDs.show();                           // Send the updated pixel colours to the hardware
-
-
-  CR1_ulStepperMotorTimerPrevious = micros();
 }
+
 void loop()
 {
   //WSVR_BreakPoint(1);
-
-
-
-//  //stepper motor test
-// CR1_ulStepperMotorTimerNow = micros();
-// if(CR1_ulStepperMotorTimerNow - CR1_ulStepperMotorTimerPrevious >= 500)
-// {
-//     
-//   CR1_ulStepperMotorTimerPrevious = CR1_ulStepperMotorTimerNow;
-//   digitalWrite(ciStepperMotorDir,LOW);
-//   CR1_btStep ^= 1;
-//   digitalWrite(ciStepperMotorStep,CR1_btStep);
-// }    
-
-  while (Serial2.available() > 0)
-  {
-    CR1_ui8IRDatum = Serial2.read();
-    //Serial.println(CR1_ui8IRDatum,HEX);
-  }
-   
 
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
   if (iButtonValue != iLastButtonState) {      // if value has changed
@@ -226,7 +194,7 @@ void loop()
 
  if(!digitalRead(ciLimitSwitch))
  {
-  btRun = 0;//if limit switch is pressed stop bot
+  btRun = 0; //if limit switch is pressed stop bot
   ucMotorStateIndex = 0;
   ucMotorState = 0;
   move(0);
@@ -244,7 +212,6 @@ void loop()
       CR1_ui8IRDatum = 0;                     // if so, clear incoming byte
     }
  }
-
  CR1_ulMainTimerNow = micros();
  if(CR1_ulMainTimerNow - CR1_ulMainTimerPrevious >= CR1_ciMainTimer)
  {
@@ -294,7 +261,7 @@ void loop()
           }
           case 3:
           {
-             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
+            ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
             CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
             CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
             ucMotorStateIndex = 4;
@@ -405,7 +372,7 @@ void loop()
       {
         MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
       }
-      
+   
       CR1_ucMainTimerCaseCore1 = 4;
       break;
     }
@@ -437,6 +404,9 @@ void loop()
     {
        if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
          SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
+       }
+       else if (CR1_ui8IRDatum == 0x41) {           // if "hit" character is seen
+         SmartLEDs.setPixelColor(0,25,0,25);        // make LED1 purple with 10% intensity
        }
        else {                                       // otherwise
          SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
@@ -473,4 +443,6 @@ void loop()
     digitalWrite(ciHeartbeatLED, btHeartbeat);
    // Serial.println((vui32test2 - vui32test1)* 3 );
  }
+
 }
+
