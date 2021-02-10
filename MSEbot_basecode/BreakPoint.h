@@ -86,14 +86,14 @@ usage
 #define WATCH_VARIABLE_14_TYPE volatile int32_t
 #define WATCH_VARIABLE_14 ENC_vi32RightOdometerCompare
 
-//#define WATCH_VARIABLE_15_NAME ""
-//#define WATCH_VARIABLE_15_TYPE unsigned int
-//#define WATCH_VARIABLE_15 
+#define WATCH_VARIABLE_15_NAME "ENC_vi32LeftEncoderARawTimeMin"
+#define WATCH_VARIABLE_15_TYPE volatile int32_t
+#define WATCH_VARIABLE_15 ENC_vi32LeftEncoderARawTimeMin
 //
 
-//#define WATCH_VARIABLE_16_NAME ""
-//#define WATCH_VARIABLE_16_TYPE unsigned int
-//#define WATCH_VARIABLE_16
+#define WATCH_VARIABLE_16_NAME "ENC_vi32LeftEncoderARawTimeMax"
+#define WATCH_VARIABLE_16_TYPE volatile int32_t
+#define WATCH_VARIABLE_16 ENC_vi32LeftEncoderARawTimeMin
 // 
 ////-----------------------------------------------------------
 ////Row 5

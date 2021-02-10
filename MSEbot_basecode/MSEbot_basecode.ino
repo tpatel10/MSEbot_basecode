@@ -392,7 +392,7 @@ void loop()
     case 2: 
     {
       //average the encoder tick times
-      ENC_Averaging();
+     // ENC_Averaging();
 
       CR1_ucMainTimerCaseCore1 = 3;
       break;

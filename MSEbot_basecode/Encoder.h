@@ -29,12 +29,17 @@
  volatile uint16_t ENC_vui16RightEncoderBMissed;
 
  
-uint16_t ENC_uiAlpha = 8196;
+ uint16_t ENC_uiAlpha = 8196;
 
  volatile int32_t ENC_vi32LeftEncoderARawTime;
  volatile int32_t ENC_vi32LeftEncoderBRawTime;
  volatile int32_t ENC_vi32RightEncoderARawTime;
  volatile int32_t ENC_vi32RightEncoderBRawTime;
+
+
+ volatile int32_t ENC_vi32LeftEncoderARawTimeMin;
+ volatile int32_t ENC_vi32LeftEncoderARawTimeMax;
+ 
  
  int32_t ENC_i32LeftEncoderAAveTime;
  int32_t ENC_i32LeftEncoderBAveTime;
@@ -312,8 +317,18 @@ int32_t ENC_Averaging()
    //yn=yn−1⋅(1−α)+xn⋅α  exponentially weighted moving average IIR Filter 65535 = 1
 
    //Left Enoder A
+   
   if(ENC_btLeftEncoderADataFlag)
    {
+    if(ENC_vi32LeftEncoderARawTime < ENC_vi32LeftEncoderARawTimeMin)
+    {
+      ENC_vi32LeftEncoderARawTimeMin = ENC_vi32LeftEncoderARawTime;
+    }
+    if(ENC_vi32LeftEncoderARawTime > ENC_vi32LeftEncoderARawTimeMax)
+    {
+      ENC_vi32LeftEncoderARawTimeMax = ENC_vi32LeftEncoderARawTime;
+    }
+    
     ENC_btLeftEncoderADataFlag = false;
     
     if (ENC_uiAlpha == 65535 )
@@ -385,6 +400,8 @@ int32_t ENC_Averaging()
 void ENC_ClearLeftOdometer()
 {
   ENC_vi32LeftOdometer = 0;
+  ENC_vi32LeftEncoderARawTimeMin = 0x7fffffff;
+  ENC_vi32LeftEncoderARawTimeMax = 0xffffffff;
 }
 
 
