@@ -77,7 +77,7 @@ void loopWEBServerButtonresponce(void);
 
 const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
-const int CR1_ciMotorRunTime = 1250;
+const int CR1_ciMotorRunTime = 5000;
 const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 220;
 
@@ -163,10 +163,15 @@ void loop()
 {
   //WSVR_BreakPoint(1);
 
+   //average the encoder tick times
+   ENC_Averaging();
+
   int iButtonValue = digitalRead(ciPB1);       // read value of push button 1
   if (iButtonValue != iLastButtonState) {      // if value has changed
      CR1_ulLastDebounceTime = millis();        // reset the debouncing timer
   }
+
+  
 
  if ((millis() - CR1_ulLastDebounceTime) > CR1_clDebounceDelay) {
     if (iButtonValue != iButtonState) {        // if the button state has changed
@@ -244,7 +249,7 @@ void loop()
            case 1:
           {
             
-            ENC_SetDistance(116, 116);
+            ENC_SetDistance(10000, 10000);
             ucMotorState = 1;   //forward
             CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
             CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
@@ -297,7 +302,7 @@ void loop()
           {
             ucMotorStateIndex = 8;
             ucMotorState = 4;  //reverse
-            ENC_SetDistance(-125, -125);
+            ENC_SetDistance(-10000, -10000);
             CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
             CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
             
@@ -358,9 +363,10 @@ void loop()
     //###############################################################################
     case 2: 
     {
-      //average the encoder tick times
-     // ENC_Averaging();
-
+     // asm volatile("esync; rsr %0,ccount":"=a" (vui32test1)); // @ 240mHz clock each tick is ~4nS 
+     
+   //   asm volatile("esync; rsr %0,ccount":"=a" (vui32test2)); // @ 240mHz clock each tick is ~4nS 
+     
       CR1_ucMainTimerCaseCore1 = 3;
       break;
     }
@@ -445,4 +451,3 @@ void loop()
  }
 
 }
-

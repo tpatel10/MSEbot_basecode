@@ -37,16 +37,14 @@
  volatile int32_t ENC_vi32RightEncoderBRawTime;
 
 
- volatile int32_t ENC_vi32LeftEncoderARawTimeMin;
- volatile int32_t ENC_vi32LeftEncoderARawTimeMax;
  
- 
- int32_t ENC_i32LeftEncoderAAveTime;
- int32_t ENC_i32LeftEncoderBAveTime;
- int32_t ENC_i32RightEncoderAAveTime;
- int32_t ENC_i32RightEncoderBAveTime;
+ int32_t ENC_ui32LeftEncoderAAveTime;
+ int32_t ENC_ui32LeftEncoderBAveTime;
+ int32_t ENC_ui32RightEncoderAAveTime;
+ int32_t ENC_ui32RightEncoderBAveTime;
 
- 
+ uint32_t ENC_ui32LeftEncoderAveTime;
+ uint32_t ENC_ui32RightEncoderAveTime;
 
  volatile int32_t ENC_vi32LeftOdometer;
  volatile int32_t ENC_vi32RightOdometer;
@@ -54,11 +52,15 @@
  volatile int32_t ENC_vi32LeftOdometerCompare;
  volatile int32_t ENC_vi32RightOdometerCompare;
 
+
+ volatile int32_t ENC_vsi32LastTimeLA;
+ volatile int32_t ENC_vsi32ThisTimeLA;
+
 void ENC_Calibrate()
 {
   
   
-  //asm volatile("esync; rsr %0,ccount":"=a" (ENCc_vi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
+  //asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
 
 
 
@@ -86,27 +88,29 @@ void ENC_SetDistance(int32_t i32LeftDistance, int32_t i32RightDistance)
    ENC_btRightMotorRunningFlag = true;
    ui8LeftWorkingSpeed = cui8StartingSpeed;
    ui8RightWorkingSpeed = cui8StartingSpeed;
+
 }
 
 //Encoder interrupt service routines - entered every change in in encoder pin H-> L and L ->H
 //---------------------------------------------------------------------------------------------
 void IRAM_ATTR ENC_isrLeftA()
 {
-  volatile int32_t ENCc_vi32LastTime;
-  volatile int32_t ENCc_vi32ThisTime;
-
+   volatile static int32_t ENC_vsi32LastTime;
+   volatile static int32_t ENC_vsi32ThisTime;
   
-  
- // asm volatile("esync; rsr %0,ccount":"=a" (vui32test1)); // @ 240mHz clock each tick is ~4nS 
+ 
    // if the last interrupts data wasn't collected, count the miss
   if(ENC_btLeftEncoderADataFlag)
   {
-    ENC_vui16LeftEncoderAMissed += ENC_vui16LeftEncoderAMissed;
+    ENC_vui16LeftEncoderAMissed += 1;
+    
   }
+ 
   //how much time elapsed since last interrupt
-  ENCc_vi32LastTime = ENCc_vi32ThisTime;
-  asm volatile("esync; rsr %0,ccount":"=a" (ENCc_vi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
-  ENC_vi32LeftEncoderARawTime = ENCc_vi32ThisTime - ENCc_vi32LastTime;
+  
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime )); // @ 240mHz clock each tick is ~4nS 
+  ENC_vi32LeftEncoderARawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
+  ENC_vsi32LastTime = ENC_vsi32ThisTime;
   ENC_btLeftEncoderADataFlag = true;
 
   //if both pins are high or low then count down otherwise wheel is going backwards count up
@@ -138,23 +142,23 @@ void IRAM_ATTR ENC_isrLeftA()
     }
     
   }
-   //asm volatile("esync; rsr %0,ccount":"=a" (vui32test2)); // @ 240mHz clock each tick is ~4nS 
+  
 }
 
 void IRAM_ATTR ENC_isrLeftB()
 {
-  volatile int32_t ENCc_vi32LastTime;
-  volatile int32_t ENCc_vi32ThisTime;
+  volatile static int32_t ENC_vsi32LastTime;
+  volatile static int32_t ENC_vsi32ThisTime;
   
    // if the last interrupts data wasn't collected, count the miss
   if(ENC_btLeftEncoderBDataFlag)
   {
-    ENC_vui16LeftEncoderBMissed += ENC_vui16LeftEncoderBMissed;
+    ENC_vui16LeftEncoderBMissed += 1;
   }
   //how much time elapsed since last interrupt
-  ENCc_vi32LastTime = ENCc_vi32ThisTime;
-  asm volatile("esync; rsr %0,ccount":"=a" (ENCc_vi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
-  ENC_vi32LeftEncoderBRawTime = ENCc_vi32ThisTime - ENCc_vi32LastTime;
+  ENC_vsi32LastTime = ENC_vsi32ThisTime;
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
+  ENC_vi32LeftEncoderBRawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
   ENC_btLeftEncoderBDataFlag = true;
 
   //Left Encoder B is opposite of A so if  both pins are high or low then count up otherwise wheel is going forwards count down
@@ -188,18 +192,18 @@ void IRAM_ATTR ENC_isrLeftB()
 
 void IRAM_ATTR ENC_isrRightA()
 {
-  volatile int32_t ENCc_vi32LastTime;
-  volatile int32_t ENCc_vi32ThisTime;
+  volatile static int32_t ENC_vsi32LastTime;
+  volatile static int32_t ENC_vsi32ThisTime;
 
    // if the last interrupts data wasn't collected, count the miss
   if(ENC_btRightEncoderADataFlag)
   {
-    ENC_vui16RightEncoderAMissed += ENC_vui16RightEncoderAMissed;
+    ENC_vui16RightEncoderAMissed += 1;
   }
   //how much time elapsed since last interrupt
-  ENCc_vi32LastTime = ENCc_vi32ThisTime;
-  asm volatile("esync; rsr %0,ccount":"=a" (ENCc_vi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
-  ENC_vi32RightEncoderARawTime = ENCc_vi32ThisTime - ENCc_vi32LastTime;
+  ENC_vsi32LastTime = ENC_vsi32ThisTime;
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
+  ENC_vi32RightEncoderARawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
   ENC_btRightEncoderADataFlag = true;
 
   //Right Encoder A -  if both pins are high or low then count down otherwise wheel is going forwards count up
@@ -233,19 +237,19 @@ void IRAM_ATTR ENC_isrRightA()
 
 void IRAM_ATTR ENC_isrRightB()
 {
-  volatile int32_t ENCc_vi32LastTime;
-  volatile int32_t ENCc_vi32ThisTime;
+  volatile static int32_t ENC_vsi32LastTime;
+  volatile static int32_t ENC_vsi32ThisTime;
 
   
   // if the last interrupts data wasn't collected, count the miss
   if(ENC_btRightEncoderBDataFlag)
   {
-    ENC_vui16RightEncoderBMissed += ENC_vui16RightEncoderBMissed;
+    ENC_vui16RightEncoderBMissed += 1;
   }
   //how much time elapsed since last interrupt
-  ENCc_vi32LastTime = ENCc_vi32ThisTime;
-  asm volatile("esync; rsr %0,ccount":"=a" (ENCc_vi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
-  ENC_vi32RightEncoderBRawTime = ENCc_vi32ThisTime - ENCc_vi32LastTime;
+  ENC_vsi32LastTime = ENC_vsi32ThisTime;
+  asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
+  ENC_vi32RightEncoderBRawTime = ENC_vsi32ThisTime - ENC_vsi32LastTime;
   ENC_btRightEncoderBDataFlag = true;
 
   //Right Encoder B is opposite of A so if both pins are high or low then count up otherwise wheel is going forwards count down
@@ -295,6 +299,7 @@ void ENC_Init()
   ENC_btLeftMotorRunningFlag = false;
   ENC_btRightMotorRunningFlag = false;
 
+
   //check to see if calibration is in eeprom and retreive
   
   
@@ -314,7 +319,7 @@ void ENC_Disable()
 int32_t ENC_Averaging()
 {
     
-  int32_t vi32CalutatedAverageTime;
+  int64_t vi64CalutatedAverageTime;
   
    //yn=yn−1⋅(1−α)+xn⋅α  exponentially weighted moving average IIR Filter 65535 = 1
 
@@ -322,27 +327,23 @@ int32_t ENC_Averaging()
    
   if(ENC_btLeftEncoderADataFlag)
    {
-    if(ENC_vi32LeftEncoderARawTime < ENC_vi32LeftEncoderARawTimeMin)
-    {
-      ENC_vi32LeftEncoderARawTimeMin = ENC_vi32LeftEncoderARawTime;
-    }
-    if(ENC_vi32LeftEncoderARawTime > ENC_vi32LeftEncoderARawTimeMax)
-    {
-      ENC_vi32LeftEncoderARawTimeMax = ENC_vi32LeftEncoderARawTime;
-    }
-    
+       
     ENC_btLeftEncoderADataFlag = false;
     
     if (ENC_uiAlpha == 65535 )
     {
-      ENC_i32LeftEncoderAAveTime = ENC_vi32LeftEncoderARawTime;
+      ENC_ui32LeftEncoderAAveTime = ENC_vi32LeftEncoderARawTime;
     }
     else
     {
-      vi32CalutatedAverageTime = (int64_t)ENC_i32LeftEncoderAAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32LeftEncoderARawTime * ENC_uiAlpha);
-      ENC_i32LeftEncoderAAveTime = (int32_t)((vi32CalutatedAverageTime + 32768) / 65536);
-      
+      vi64CalutatedAverageTime = (int64_t)ENC_ui32LeftEncoderAAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32LeftEncoderARawTime * ENC_uiAlpha);
+      ENC_ui32LeftEncoderAAveTime = (int32_t)((vi64CalutatedAverageTime + 32768) / 65536);
+   
     }
+    if(ENC_ISMotorRunning())
+      {
+        ENC_ui32LeftEncoderAveTime = ((ENC_ui32LeftEncoderAAveTime + ENC_ui32LeftEncoderBAveTime) * 3)/1000;
+      }
   }
 
      //Left Enoder B
@@ -352,15 +353,21 @@ int32_t ENC_Averaging()
     
     if (ENC_uiAlpha == 65535 )
     {
-      ENC_i32LeftEncoderBAveTime = ENC_vi32LeftEncoderBRawTime;
+      ENC_ui32LeftEncoderBAveTime = ENC_vi32LeftEncoderBRawTime;
     }
     else
     {
-      vi32CalutatedAverageTime = (int64_t)ENC_i32LeftEncoderBAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32LeftEncoderBRawTime * ENC_uiAlpha);
-      ENC_i32LeftEncoderBAveTime = (int32_t)((vi32CalutatedAverageTime + 32768) / 65536);
+      vi64CalutatedAverageTime = (int64_t)ENC_ui32LeftEncoderBAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32LeftEncoderBRawTime * ENC_uiAlpha);
+      ENC_ui32LeftEncoderBAveTime = (int32_t)((vi64CalutatedAverageTime + 32768) / 65536);
       
     }
+    if(ENC_ISMotorRunning())
+      {
+        ENC_ui32LeftEncoderAveTime = ((ENC_ui32LeftEncoderAAveTime + ENC_ui32LeftEncoderBAveTime) * 3)/1000;
+      }
   }
+
+  
     //Right Enoder A
   if(ENC_btRightEncoderADataFlag)
    {
@@ -368,14 +375,18 @@ int32_t ENC_Averaging()
     
     if (ENC_uiAlpha == 65535 )
     {
-      ENC_i32RightEncoderAAveTime = ENC_vi32RightEncoderARawTime;
+      ENC_ui32RightEncoderAAveTime = ENC_vi32RightEncoderARawTime;
     }
     else
     {
-      vi32CalutatedAverageTime = (int64_t)ENC_i32RightEncoderAAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32RightEncoderARawTime * ENC_uiAlpha);
-      ENC_i32RightEncoderAAveTime = (int32_t)((vi32CalutatedAverageTime + 32768) / 65536);
+      vi64CalutatedAverageTime = (int64_t)ENC_ui32RightEncoderAAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32RightEncoderARawTime * ENC_uiAlpha);
+      ENC_ui32RightEncoderAAveTime = (int32_t)((vi64CalutatedAverageTime + 32768) / 65536);
       
     }
+    if(ENC_ISMotorRunning())
+      {
+        ENC_ui32RightEncoderAveTime = ((ENC_ui32RightEncoderAAveTime + ENC_ui32RightEncoderBAveTime) * 3)/1000;
+      }
   }
 
      //Right Enoder B
@@ -385,14 +396,18 @@ int32_t ENC_Averaging()
     
     if (ENC_uiAlpha == 65535 )
     {
-      ENC_i32RightEncoderBAveTime = ENC_vi32RightEncoderBRawTime;
+      ENC_ui32RightEncoderBAveTime = ENC_vi32RightEncoderBRawTime;
     }
     else
     {
-      vi32CalutatedAverageTime = (int64_t)ENC_i32RightEncoderBAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32RightEncoderBRawTime * ENC_uiAlpha);
-      ENC_i32RightEncoderBAveTime = (int32_t)((vi32CalutatedAverageTime + 32768) / 65536);
+      vi64CalutatedAverageTime = (int64_t)ENC_ui32RightEncoderBAveTime * (65535 - ENC_uiAlpha) + ((int64_t)ENC_vi32RightEncoderBRawTime * ENC_uiAlpha);
+      ENC_ui32RightEncoderBAveTime = (int32_t)((vi64CalutatedAverageTime + 32768) / 65536);
       
     }
+    if(ENC_ISMotorRunning())
+      {
+        ENC_ui32RightEncoderAveTime = ((ENC_ui32RightEncoderAAveTime + ENC_ui32RightEncoderBAveTime) * 3)/1000;
+      }
   }
 
   
@@ -402,8 +417,7 @@ int32_t ENC_Averaging()
 void ENC_ClearLeftOdometer()
 {
   ENC_vi32LeftOdometer = 0;
-  ENC_vi32LeftEncoderARawTimeMin = 0x7fffffff;
-  ENC_vi32LeftEncoderARawTimeMax = 0xffffffff;
+ 
 }
 
 
@@ -411,23 +425,6 @@ void ENC_ClearRightOdometer()
 {
   ENC_vi32RightOdometer = 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

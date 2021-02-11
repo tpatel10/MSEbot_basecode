@@ -14,6 +14,8 @@
 #define DEBUGPRINT 1
 #define ACCELERATIONRATE 1;
 
+
+
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
 
@@ -55,6 +57,15 @@ void setupMotion (void)
  	
    ucMotion_Direction = 0;
    ucMotion_Speed = 0;
+}
+
+
+void ResetSpeeds()
+{
+  ui8LeftWorkingSpeed = cui8StartingSpeed;
+  ui8RightWorkingSpeed = cui8StartingSpeed;
+
+  
 }
 
 void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)

@@ -20,7 +20,7 @@ usage
 //-----------------------------------------------------------
 //Row 1
  
-#define WATCH_VARIABLE_1_NAME "uiTestCounter;LL1;0;UL1;65535" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_1_NAME "uiTestCounter"
 #define WATCH_VARIABLE_1_TYPE unsigned int
 #define WATCH_VARIABLE_1 uiTestCounter
 // 
@@ -59,41 +59,41 @@ usage
 ////Row 3
 
 
-#define WATCH_VARIABLE_9_NAME "ENC_i32LeftEncoderAAveTime"
-#define WATCH_VARIABLE_9_TYPE int32_t
-#define WATCH_VARIABLE_9 ENC_i32LeftEncoderAAveTime
+#define WATCH_VARIABLE_9_NAME "ENC_ui32LeftEncoderAveTime;LL1;8000;UL1;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_9_TYPE uint32_t
+#define WATCH_VARIABLE_9 ENC_ui32LeftEncoderAveTime
  
-#define WATCH_VARIABLE_10_NAME "ENC_i32LeftEncoderBAveTime"
-#define WATCH_VARIABLE_10_TYPE int32_t
-#define WATCH_VARIABLE_10 ENC_i32LeftEncoderBAveTime
+#define WATCH_VARIABLE_10_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_10_TYPE uint32_t
+#define WATCH_VARIABLE_10 ENC_ui32RightEncoderAveTime
 
-#define WATCH_VARIABLE_11_NAME "ENC_i32RightEncoderAAveTime"
-#define WATCH_VARIABLE_11_TYPE int32_t
-#define WATCH_VARIABLE_11 ENC_i32RightEncoderAAveTime
-
-#define WATCH_VARIABLE_12_NAME "ENC_i32RightEncoderBAveTime"
-#define WATCH_VARIABLE_12_TYPE int32_t
-#define WATCH_VARIABLE_12 ENC_i32RightEncoderBAveTime
+//#define WATCH_VARIABLE_11_NAME ""
+//#define WATCH_VARIABLE_11_TYPE int32_t
+//#define WATCH_VARIABLE_11 
+//
+//#define WATCH_VARIABLE_12_NAME ""
+//#define WATCH_VARIABLE_12_TYPE int32_t
+//#define WATCH_VARIABLE_12 
 
 ////-----------------------------------------------------------
 ////Row 4
-#define WATCH_VARIABLE_13_NAME "ENC_vi32LeftOdometerCompare"
-#define WATCH_VARIABLE_13_TYPE volatile int32_t
-#define WATCH_VARIABLE_13 ENC_vi32LeftOdometerCompare
+//#define WATCH_VARIABLE_13_NAME "ENC_vi32LeftOdometerCompare"
+//#define WATCH_VARIABLE_13_TYPE volatile int32_t
+//#define WATCH_VARIABLE_13 ENC_vi32LeftOdometerCompare
+////
 //
-
-#define WATCH_VARIABLE_14_NAME "ENC_vi32RightOdometerCompare"
-#define WATCH_VARIABLE_14_TYPE volatile int32_t
-#define WATCH_VARIABLE_14 ENC_vi32RightOdometerCompare
-
-#define WATCH_VARIABLE_15_NAME "ENC_vi32LeftEncoderARawTimeMin"
-#define WATCH_VARIABLE_15_TYPE volatile int32_t
-#define WATCH_VARIABLE_15 ENC_vi32LeftEncoderARawTimeMin
+//#define WATCH_VARIABLE_14_NAME "ENC_vi32RightOdometerCompare"
+//#define WATCH_VARIABLE_14_TYPE volatile int32_t
+//#define WATCH_VARIABLE_14 ENC_vi32RightOdometerCompare
 //
-
-#define WATCH_VARIABLE_16_NAME "ENC_vi32LeftEncoderARawTimeMax"
-#define WATCH_VARIABLE_16_TYPE volatile int32_t
-#define WATCH_VARIABLE_16 ENC_vi32LeftEncoderARawTimeMin
+//#define WATCH_VARIABLE_15_NAME "ENC_vi32LeftEncoderARawTime"
+//#define WATCH_VARIABLE_15_TYPE volatile int32_t
+//#define WATCH_VARIABLE_15 ENC_vi32LeftEncoderARawTime
+////
+//
+//#define WATCH_VARIABLE_16_NAME "ENC_vi32LeftEncoderBRawTime"
+//#define WATCH_VARIABLE_16_TYPE volatile int32_t
+//#define WATCH_VARIABLE_16 ENC_vi32LeftEncoderBRawTime
 // 
 ////-----------------------------------------------------------
 ////Row 5
