@@ -59,11 +59,11 @@ usage
 ////Row 3
 
 
-#define WATCH_VARIABLE_9_NAME "ENC_ui32LeftEncoderAveTime;LL1;8000;UL1;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_9_NAME "ENC_ui32LeftEncoderAveTime;LL1;8000;UL1;400000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
 #define WATCH_VARIABLE_9_TYPE uint32_t
 #define WATCH_VARIABLE_9 ENC_ui32LeftEncoderAveTime
  
-#define WATCH_VARIABLE_10_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_10_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;400000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
 #define WATCH_VARIABLE_10_TYPE uint32_t
 #define WATCH_VARIABLE_10 ENC_ui32RightEncoderAveTime
 

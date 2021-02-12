@@ -77,7 +77,7 @@ void loopWEBServerButtonresponce(void);
 
 const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
-const int CR1_ciMotorRunTime = 5000;
+const int CR1_ciMotorRunTime = 1000;
 const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 220;
 
@@ -171,9 +171,7 @@ void loop()
      CR1_ulLastDebounceTime = millis();        // reset the debouncing timer
   }
 
-  
-
- if ((millis() - CR1_ulLastDebounceTime) > CR1_clDebounceDelay) {
+  if ((millis() - CR1_ulLastDebounceTime) > CR1_clDebounceDelay) {
     if (iButtonValue != iButtonState) {        // if the button state has changed
     iButtonState = iButtonValue;               // update current button state
 
@@ -249,7 +247,7 @@ void loop()
            case 1:
           {
             
-            ENC_SetDistance(10000, 10000);
+            ENC_SetDistance(200, 200);
             ucMotorState = 1;   //forward
             CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
             CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
@@ -302,7 +300,7 @@ void loop()
           {
             ucMotorStateIndex = 8;
             ucMotorState = 4;  //reverse
-            ENC_SetDistance(-10000, -10000);
+            ENC_SetDistance(-200, -200);
             CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
             CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
             
@@ -342,8 +340,6 @@ void loop()
             
             break;
           }
-        
-        
          }
         }
       }
@@ -355,7 +351,7 @@ void loop()
     case 1: 
     {
       //read pot 1 for motor speeds 
-      CR1_ui8WheelSpeed = analogRead(ciPot1) >> 4;  // drop 4 least significant bits (12-bit -> 8-bit)
+      CR1_ui8WheelSpeed = map(analogRead(ciPot1), 0, 4096, 130, 255);  // adjust to range that will produce motion
       
       CR1_ucMainTimerCaseCore1 = 2;
       break;
