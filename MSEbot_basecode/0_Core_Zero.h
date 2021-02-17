@@ -47,6 +47,7 @@ void Core_ZEROInit()
   delay(500); 
 };
 
+void CR0_CheckOperationTime();
 
 void Core_ZeroCode( void * pvParameters )
 {
@@ -114,9 +115,8 @@ void Core_ZeroCode( void * pvParameters )
           case 1: //
           {
          
-            uiTestCounter = uiTestCounter + 1;
-            //Serial.println(uiTestCounter);
-            WSVR_BreakPoint(1);
+           
+             
             CR0_ucMainTimerCaseCore0 = 2;
           
             break;
@@ -125,9 +125,14 @@ void Core_ZeroCode( void * pvParameters )
           case 2: //web page control
           {
             asm volatile("esync; rsr %0,ccount":"=a" (CR0_u32Last)); // @ 240mHz clock each tick is ~4nS  
-            webSocket.loop();
-            asm volatile("esync; rsr %0,ccount":"=a" (CR0_u32Now));    
+            uiTestCounter = uiTestCounter + 1;
+            WSVR_Watch();
+           // WSVR_BreakPoint(1);
            
+            asm volatile("esync; rsr %0,ccount":"=a" (CR0_u32Now));    
+            webSocket.loop();
+            CR0_CheckOperationTime();
+            
             CR0_ucMainTimerCaseCore0 = 3;
             break;
           }
@@ -190,6 +195,42 @@ void Core_ZeroCode( void * pvParameters )
         
       }
   }
+}
+
+
+
+
+void CR0_CheckOperationTime()
+{
+  float fTempTime;
+  uint32_t ui32TempTime;
+
+  //uses CR0_u32Last and CR0_u32Now and prints time
+    ui32TempTime = CR0_u32Now - CR0_u32Last;
+    fTempTime = (ui32TempTime * 3)/1000000;
+    if(fTempTime != 0)
+    {
+     Serial.print(fTempTime);
+     Serial.println(" mS");
+    }
+    else
+    {
+     fTempTime = (ui32TempTime * 3)/1000;
+     if(fTempTime != 0)
+     {
+      Serial.print(fTempTime);
+      Serial.println(" uS");
+     }
+     else
+     {    
+      fTempTime = ui32TempTime * 3;
+      if(fTempTime != 0)
+      {
+       Serial.print(fTempTime);
+       Serial.println(" nS");
+      }
+     }
+    }
 }
 
 #endif

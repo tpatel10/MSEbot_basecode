@@ -63,13 +63,13 @@ usage
 #define WATCH_VARIABLE_9_TYPE uint32_t
 #define WATCH_VARIABLE_9 ENC_ui32LeftEncoderAveTime
  
-#define WATCH_VARIABLE_10_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
-#define WATCH_VARIABLE_10_TYPE uint32_t
-#define WATCH_VARIABLE_10 ENC_ui32RightEncoderAveTime
+//#define WATCH_VARIABLE_10_NAME ""
+//#define WATCH_VARIABLE_10_TYPE uint32_t
+//#define WATCH_VARIABLE_10 
 
-//#define WATCH_VARIABLE_11_NAME ""
-//#define WATCH_VARIABLE_11_TYPE int32_t
-//#define WATCH_VARIABLE_11 
+#define WATCH_VARIABLE_11_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
+#define WATCH_VARIABLE_11_TYPE uint32_t
+#define WATCH_VARIABLE_11 ENC_ui32RightEncoderAveTime
 //
 //#define WATCH_VARIABLE_12_NAME ""
 //#define WATCH_VARIABLE_12_TYPE int32_t
@@ -359,7 +359,7 @@ void WSVR_BreakPoint(unsigned char ucBPindex)
        {
          WSVR_SendMsg(strWSVR_VariableData);
          webSocket.loop();
-         WSVR_ButtonResponse();
+        // WSVR_ButtonResponse();
          vTaskDelay(1);
          if((bWSVR_DebugOfOff == false) || (bWSVR_HaltContinuous))
          {
@@ -386,6 +386,230 @@ void WSVR_BreakPoint(unsigned char ucBPindex)
 
 
 
+void WSVR_Watch()
+{
+  bool btSendData = false;
+  volatile static uint8_t vsui8WSVR_WatchIndex;
+  
+  if(bWSVR_DebugOfOff)
+  {
+     
+   strWSVR_VariableData = String("W#^;");
+   switch(vsui8WSVR_WatchIndex)
+   {
+    case 0:
+    {
+      vsui8WSVR_WatchIndex = 1;
+      #ifdef WATCH_VARIABLE_1_NAME
+        strWSVR_VariableData += ("0;" + String(WATCH_VARIABLE_1) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 1:
+    {
+      vsui8WSVR_WatchIndex = 2;
+      #ifdef WATCH_VARIABLE_2_NAME
+        strWSVR_VariableData +=  ("1;" + String(WATCH_VARIABLE_2) + ";");
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 2:
+    {
+      vsui8WSVR_WatchIndex = 3;
+      #ifdef WATCH_VARIABLE_3_NAME
+        strWSVR_VariableData +=  ("2;" + String(WATCH_VARIABLE_3) + ";");
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 3:
+    {
+      vsui8WSVR_WatchIndex = 4;
+      #ifdef WATCH_VARIABLE_4_NAME
+        strWSVR_VariableData += ("3;" + String(WATCH_VARIABLE_4) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 4:
+    {
+      vsui8WSVR_WatchIndex = 5;
+      #ifdef WATCH_VARIABLE_5_NAME
+        strWSVR_VariableData += ("4;" + String(WATCH_VARIABLE_5) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 5:
+    {
+      vsui8WSVR_WatchIndex  = 6;
+      #ifdef WATCH_VARIABLE_6_NAME
+        strWSVR_VariableData += ("5;" + String(WATCH_VARIABLE_6) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 6:
+    {
+      vsui8WSVR_WatchIndex = 7;
+      #ifdef WATCH_VARIABLE_7_NAME
+        strWSVR_VariableData += ("6;" + String(WATCH_VARIABLE_7) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 7:
+    {
+      vsui8WSVR_WatchIndex = 8;
+      #ifdef WATCH_VARIABLE_8_NAME
+        strWSVR_VariableData += ("7;" + String(WATCH_VARIABLE_8) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 8:
+    {
+      vsui8WSVR_WatchIndex = 9;
+      #ifdef WATCH_VARIABLE_9_NAME
+        strWSVR_VariableData += ("8;" + String(WATCH_VARIABLE_9) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 9:
+    {
+      vsui8WSVR_WatchIndex  = 10;
+      #ifdef WATCH_VARIABLE_10_NAME
+        strWSVR_VariableData += ("9;" + String(WATCH_VARIABLE_10) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 10:
+    {
+      vsui8WSVR_WatchIndex = 11;
+      #ifdef WATCH_VARIABLE_11_NAME
+        strWSVR_VariableData += ("10;" + String(WATCH_VARIABLE_11) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 11:
+    {
+      vsui8WSVR_WatchIndex = 12;
+      #ifdef WATCH_VARIABLE_12_NAME
+        strWSVR_VariableData += ("11;" +  String(WATCH_VARIABLE_12) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 12:
+    {
+      vsui8WSVR_WatchIndex = 13;
+      #ifdef WATCH_VARIABLE_13_NAME
+        strWSVR_VariableData += ("12;" + String(WATCH_VARIABLE_13) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 13:
+    {
+      vsui8WSVR_WatchIndex = 14;
+      #ifdef WATCH_VARIABLE_14_NAME
+        strWSVR_VariableData += ("13;" + String(WATCH_VARIABLE_14) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 14:
+    {
+      vsui8WSVR_WatchIndex = 15;
+      #ifdef WATCH_VARIABLE_15_NAME
+        strWSVR_VariableData += ("14;" + String(WATCH_VARIABLE_15) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 15:
+    {
+      vsui8WSVR_WatchIndex = 16;
+      #ifdef WATCH_VARIABLE_16_NAME
+        strWSVR_VariableData += ("15;" + String(WATCH_VARIABLE_16) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 16:
+    {
+      vsui8WSVR_WatchIndex = 17;
+      #ifdef WATCH_VARIABLE_17_NAME
+        strWSVR_VariableData += ("16;" + String(WATCH_VARIABLE_17) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 17:
+    {
+      vsui8WSVR_WatchIndex = 18;
+      #ifdef WATCH_VARIABLE_18_NAME
+        strWSVR_VariableData += ("17;" + String(WATCH_VARIABLE_18) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 18:
+    {
+      vsui8WSVR_WatchIndex = 19;
+      #ifdef WATCH_VARIABLE_19_NAME
+        strWSVR_VariableData += ("18;" + String(WATCH_VARIABLE_19) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    case 19:
+    {
+      vsui8WSVR_WatchIndex = 0;
+      #ifdef WATCH_VARIABLE_20_NAME
+        strWSVR_VariableData += ("19;" + String(WATCH_VARIABLE_20) + ";"); 
+        btSendData = true;
+        break;
+      #endif  
+      
+    }
+    default:
+    {
+      vsui8WSVR_WatchIndex = 0;
+      btSendData = false;
+      break;
+    }
+   }
+   if(btSendData)
+   {
+    WSVR_SendMsg(strWSVR_VariableData);
+   }
+  }
+ }
 
 
 

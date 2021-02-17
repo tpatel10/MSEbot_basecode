@@ -1,4 +1,4 @@
-
+ 
 //MSE 2202 
 //Western Engineering base code
 //2020 05 13 E J Porter
@@ -161,8 +161,8 @@ void setup() {
 
 void loop()
 {
-  //WSVR_BreakPoint(1);
-
+  //WSVR_BreakPoint(2);
+  //Serial.println("BP2");
    //average the encoder tick times
    ENC_Averaging();
 
@@ -393,7 +393,10 @@ void loop()
     case 5: 
     {
       
-     
+      
+      // Serial.println(uiTestCounter);
+
+       
       CR1_ucMainTimerCaseCore1 = 6;
       break;
     }

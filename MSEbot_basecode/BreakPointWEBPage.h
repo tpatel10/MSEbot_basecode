@@ -411,6 +411,8 @@ connection.onclose = function () { console.log('WebSocket connection closed');};
 // Called when a message is received from the server
 function onMessage(e) 
 {
+
+
  
     // Print out our received message
     console.log("Received: " + e.data);
@@ -424,6 +426,14 @@ function onMessage(e)
     WatchCommandIndex = 0;
     WatchVariableIndex = 0;
     getData();
+   }
+    if(vWorkingData[0] == "W#^")  //Variable data , put in chart/table
+   {
+    WatchCommandIndex = 0;
+    WatchVariableIndex = parseInt(vWorkingData[1]);
+    
+    WVD[WatchVariableIndex].innerHTML = vWorkingData[2];
+  
    }
 }
 
