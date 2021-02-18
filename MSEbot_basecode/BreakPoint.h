@@ -384,7 +384,38 @@ void WSVR_BreakPoint(unsigned char ucBPindex)
   
 }
 
+void WSVR_BP(unsigned char ucBPindex)
+{
+  
+  if(bWSVR_DebugOfOff)
+  {
+    
+    if(bWSVR_HaltContinuous == false)
+    {
+     bWSVR_Halted = true;
+       
+     if((ucBPindex != 0)  && (ucBPindex < 5))
+     {
+       strWSVR_VariableData  = String("B#^;6");
+       strWSVR_VariableData.setCharAt(4,(0x30 + ucBPindex));
+       WSVR_SendMsg(strWSVR_VariableData);
+       while(bWSVR_Halted)
+       {
+         webSocket.loop();
+       
+         vTaskDelay(1);
+         if((bWSVR_DebugOfOff == false) || (bWSVR_HaltContinuous))
+         {
+          break;
+         }
+       }
+     }
 
+    }
+  
+   }
+  
+}
 
 void WSVR_Watch()
 {

@@ -412,8 +412,6 @@ connection.onclose = function () { console.log('WebSocket connection closed');};
 function onMessage(e) 
 {
 
-
- 
     // Print out our received message
     console.log("Received: " + e.data);
     vWorkingData = (e.data).split(";");
@@ -427,13 +425,49 @@ function onMessage(e)
     WatchVariableIndex = 0;
     getData();
    }
-    if(vWorkingData[0] == "W#^")  //Variable data , put in chart/table
+    if(vWorkingData[0] == "W#^")  //Variable data , put in chart/table in variable at a time
    {
     WatchCommandIndex = 0;
     WatchVariableIndex = parseInt(vWorkingData[1]);
     
     WVD[WatchVariableIndex].innerHTML = vWorkingData[2];
+    //is this variable also being charted?
+    for (ChartVariableIndex=0;ChartVariableIndex<6;ChartVariableIndex++)  
+     {
+       if(ChartWatchIndex[ChartVariableIndex] == WatchVariableIndex)
+       {
+        ConvertFromString = parseFloat(vWorkingData[2]);
+        Denominator = (ChartUpperLimits[ChartVariableIndex] - ChartLowerLimits[ChartVariableIndex]);
+        if(ChartLowerLimits[ChartVariableIndex] < 0)
+        {
+          
+          YAxis[ChartVariableIndex] = canHeight -  (((ChartLowerLimits[ChartVariableIndex] * -1) + ConvertFromString) * canHeight)/Denominator;
+        }
+        else
+        {
+          YAxis[ChartVariableIndex] = canHeight -  (ConvertFromString * canHeight)/Denominator;
+        }
+        
+       }
+     }
   
+   }
+   if(vWorkingData[0] == "B#^")  //variable names so load charts/tables
+   {
+    
+    WatchColumHaltedAt = parseInt(vWorkingData[1]);
+    if((WatchColumHaltedAt >= 1) && (WatchColumHaltedAt <= 5))
+    {
+     WatchColumHaltedAt -= 1;  //need to be 0 to 4
+     WVH[WatchColumHaltedAt].style.backgroundColor = "red";
+    }
+    else
+    {
+      WatchColumHaltedAt = 6;
+    }
+    
+    
+     
    }
 }
 
