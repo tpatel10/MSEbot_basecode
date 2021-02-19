@@ -13,6 +13,7 @@ Western Engineering base code
   #define NVS_H 1
   
 #include <EEPROM.h>
+#include "BreakPoint.h"
 
 //DEBUG print
 #define DEBUGEEPROM 1

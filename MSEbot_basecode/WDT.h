@@ -12,6 +12,8 @@
 //---------------------------------------------------------------------------
 //WatchDog
 
+#include "BreakPoint.h"
+
 #define ONEHUNDEREDMICROSECONDS 243000
 
  

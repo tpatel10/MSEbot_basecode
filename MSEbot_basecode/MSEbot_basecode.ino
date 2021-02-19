@@ -62,6 +62,8 @@ const int ciStepperMotorStep = 21;
 volatile uint32_t vui32test1;
 volatile uint32_t vui32test2;
 
+boolean btRun = false;
+
 #include "0_Core_Zero.h"
 
 #include <esp_task_wdt.h>
@@ -111,7 +113,7 @@ unsigned long CR1_ulHeartbeatTimerPrevious;
 unsigned long CR1_ulHeartbeatTimerNow;
 
 boolean btHeartbeat = true;
-boolean btRun = false;
+//boolean btRun = false;
 boolean btToggle = true;
 int iButtonState;
 int iLastButtonState = HIGH;
@@ -233,7 +235,7 @@ void loop()
       
       if(btRun)
       {
-       CR1_ulMotorTimerNow = millis();
+     /*  CR1_ulMotorTimerNow = millis();
        if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
        {   
          CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
@@ -345,7 +347,7 @@ void loop()
         
         
          }
-        }
+        }*/
       }
       CR1_ucMainTimerCaseCore1 = 1;
       
@@ -363,9 +365,7 @@ void loop()
     //###############################################################################
     case 2: 
     {
-     // asm volatile("esync; rsr %0,ccount":"=a" (vui32test1)); // @ 240mHz clock each tick is ~4nS 
-     
-   //   asm volatile("esync; rsr %0,ccount":"=a" (vui32test2)); // @ 240mHz clock each tick is ~4nS 
+    
      
       CR1_ucMainTimerCaseCore1 = 3;
       break;
@@ -376,7 +376,7 @@ void loop()
       //move bot X number of odometer ticks
       if(ENC_ISMotorRunning())
       {
-        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+      //  MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
       }
    
       CR1_ucMainTimerCaseCore1 = 4;

@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 
 #include "Motion.h";
+#include "BreakPoint.h"
 
  
 
@@ -52,19 +53,187 @@
  volatile int32_t ENC_vi32LeftOdometerCompare;
  volatile int32_t ENC_vi32RightOdometerCompare;
 
-
  volatile int32_t ENC_vsi32LastTimeLA;
  volatile int32_t ENC_vsi32ThisTimeLA;
 
+
+ uint32_t ENC_ui32LeftEncoderAveTimeMaxA = 0;
+ uint32_t ENC_ui32RightEncoderAveTimeMaxA =  0;
+ uint32_t ENC_ui32LeftEncoderAveTimeMinA = 0xffffffff;
+ uint32_t ENC_ui32RightEncoderAveTimeMinA = 0xffffffff;
+ uint32_t ENC_ui32LeftEncoderAveTimeMaxB = 0;
+ uint32_t ENC_ui32RightEncoderAveTimeMaxB = 0;
+ uint32_t ENC_ui32LeftEncoderAveTimeMinB = 0xffffffff;
+ uint32_t ENC_ui32RightEncoderAveTimeMinB = 0xfffffff;
+
+ unsigned long ENC_ulMotorTimerNow;
+ unsigned long ENC_ulMotorTimerPrevious;
+ uint8_t ENC_SpeedTest = 0;
+ uint8_t ui8CalIndex = 0;
+ bool    btSpeedTestUD = false;
+ bool    btOnce = false;
+
+ 
 void ENC_Calibrate()
 {
   
   
-  //asm volatile("esync; rsr %0,ccount":"=a" (ENC_vsi32ThisTime)); // @ 240mHz clock each tick is ~4nS 
+   ENC_ulMotorTimerNow = millis();
+  if(ENC_ulMotorTimerNow - ENC_ulMotorTimerPrevious >= 100)   
+  {  
+   ENC_ulMotorTimerPrevious = ENC_ulMotorTimerNow;
+   switch(ui8CalIndex)
+   {
+    case 0:
+    {
+      
+      ENC_btLeftMotorRunningFlag = true;
+      ENC_btRightMotorRunningFlag = true;
+      
+       if(btSpeedTestUD)
+      {
+        ENC_SpeedTest = ENC_SpeedTest + 1;
+      }
+      else
+      {
+        ENC_SpeedTest = ENC_SpeedTest - 1;
+      }
+      if(ENC_SpeedTest == 0)
+      {
+        if(btSpeedTestUD)
+        {
+          btSpeedTestUD = false;
+          WSVR_BP(1);
+        }
+        else
+        {
+          btSpeedTestUD = true;
+        }
+         
+        
+      }
+      ucMotorState = 1;
+      move(ENC_SpeedTest); 
+      btOnce = true;
+      
+      ui8CalIndex = 1;
+      break;
+    }
+    case 1:
+    {
+      if(btOnce)
+      {
+       btOnce = false;
+      
+        ENC_ui32LeftEncoderAveTimeMaxA = 0;
+        ENC_ui32RightEncoderAveTimeMaxA =  0;
+        ENC_ui32LeftEncoderAveTimeMinA = 0xffffffff;
+        ENC_ui32RightEncoderAveTimeMinA = 0xffffffff;
+        ENC_ui32LeftEncoderAveTimeMaxB = 0;
+        ENC_ui32RightEncoderAveTimeMaxB = 0;
+        ENC_ui32LeftEncoderAveTimeMinB = 0xffffffff;
+        ENC_ui32RightEncoderAveTimeMinB = 0xfffffff;
+        ENC_ui32LeftEncoderAAveTime = 0;
+        ENC_ui32LeftEncoderBAveTime = 0;
+        ENC_ui32RightEncoderAAveTime = 0;
+        ENC_ui32RightEncoderBAveTime = 0;
+        ENC_ui32LeftEncoderAveTime = 0;
+        ENC_ui32RightEncoderAveTime = 0;
+      }
+      ui8CalIndex = 2;
+      break;
+    }
+    case 2:
+    {
 
+      ui8CalIndex = 3;
+      break;
+    }
+    case 3:
+    {
 
+      ui8CalIndex = 4;
+      break;
+    }
+    case 4:
+    {
 
+      ui8CalIndex = 5;
+      break;
+    }
+    case 5:
+    {
+
+      ui8CalIndex = 6;
+      break;
+    }
+    case 6:
+    {
+
+      ui8CalIndex = 7;
+      break;
+    }
+    case 7:
+    {
+
+      ui8CalIndex = 8;
+      break;
+    }
+    case 8:
+    {
+
+      ui8CalIndex = 9;
+      break;
+    }
+    case 9:
+    {
+
+      ui8CalIndex = 10;
+      break;
+    }
+    case 10:
+    {
+      Serial.print(ENC_SpeedTest);
+      Serial.print(",");
+      Serial.print(ENC_ui32LeftEncoderAveTime);
+      Serial.print(",");
+      
+      Serial.print(ENC_ui32LeftEncoderAAveTime);
+      Serial.print(",");
+      Serial.print(ENC_ui32LeftEncoderAveTimeMaxA);
+      Serial.print(",");
+      Serial.print(ENC_ui32LeftEncoderAveTimeMinA);
+      Serial.print(",");
+      
+      Serial.print(ENC_ui32LeftEncoderBAveTime);
+      Serial.print(",");
+      Serial.print(ENC_ui32LeftEncoderAveTimeMaxB);
+      Serial.print(",");
+      Serial.print(ENC_ui32LeftEncoderAveTimeMinB);
+      Serial.print(",");
+      
+      Serial.print(ENC_ui32RightEncoderAveTime);
+      Serial.print(",");
+      
+      Serial.print(ENC_ui32RightEncoderAAveTime);
+      Serial.print(",");
+      Serial.print(ENC_ui32RightEncoderAveTimeMaxA);
+      Serial.print(",");
+      Serial.print(ENC_ui32RightEncoderAveTimeMinA);
+      Serial.print(",");
+
+      Serial.print(ENC_ui32RightEncoderBAveTime);
+      Serial.print(",");
+      Serial.print(ENC_ui32RightEncoderAveTimeMaxB);
+      Serial.print(",");
+      Serial.println(ENC_ui32RightEncoderAveTimeMinB);  
+
+      ui8CalIndex = 0;
+      break;
+    }
   
+  }
+ }
 }
 
 boolean ENC_ISMotorRunning()
@@ -329,6 +498,15 @@ int32_t ENC_Averaging()
    {
        
     ENC_btLeftEncoderADataFlag = false;
+
+    if(ENC_ui32LeftEncoderAveTimeMaxA < ENC_vi32LeftEncoderARawTime)
+    {
+      ENC_ui32LeftEncoderAveTimeMaxA = ENC_vi32LeftEncoderARawTime;
+    }
+    if(ENC_ui32LeftEncoderAveTimeMinA > ENC_vi32LeftEncoderARawTime)
+    {
+      ENC_ui32LeftEncoderAveTimeMinA = ENC_vi32LeftEncoderARawTime;
+    }
     
     if (ENC_uiAlpha == 65535 )
     {
@@ -350,6 +528,15 @@ int32_t ENC_Averaging()
   if(ENC_btLeftEncoderBDataFlag)
    {
     ENC_btLeftEncoderBDataFlag = false;
+
+    if(ENC_ui32LeftEncoderAveTimeMaxB < ENC_vi32LeftEncoderBRawTime)
+    {
+      ENC_ui32LeftEncoderAveTimeMaxB = ENC_vi32LeftEncoderBRawTime;
+    }
+    if(ENC_ui32LeftEncoderAveTimeMinB > ENC_vi32LeftEncoderBRawTime)
+    {
+      ENC_ui32LeftEncoderAveTimeMinB = ENC_vi32LeftEncoderBRawTime;
+    }
     
     if (ENC_uiAlpha == 65535 )
     {
@@ -372,6 +559,14 @@ int32_t ENC_Averaging()
   if(ENC_btRightEncoderADataFlag)
    {
     ENC_btRightEncoderADataFlag = false;
+    if(ENC_ui32RightEncoderAveTimeMaxA < ENC_vi32RightEncoderARawTime)
+    {
+      ENC_ui32RightEncoderAveTimeMaxA = ENC_vi32RightEncoderARawTime;
+    }
+    if(ENC_ui32RightEncoderAveTimeMinA > ENC_vi32RightEncoderARawTime)
+    {
+      ENC_ui32RightEncoderAveTimeMinA = ENC_vi32RightEncoderARawTime;
+    }
     
     if (ENC_uiAlpha == 65535 )
     {
@@ -393,6 +588,14 @@ int32_t ENC_Averaging()
   if(ENC_btRightEncoderBDataFlag)
    {
     ENC_btRightEncoderBDataFlag = false;
+    if(ENC_ui32RightEncoderAveTimeMaxB < ENC_vi32RightEncoderBRawTime)
+    {
+      ENC_ui32RightEncoderAveTimeMaxB = ENC_vi32RightEncoderBRawTime;
+    }
+    if(ENC_ui32RightEncoderAveTimeMinB > ENC_vi32RightEncoderBRawTime)
+    {
+      ENC_ui32RightEncoderAveTimeMinB = ENC_vi32RightEncoderBRawTime;
+    }
     
     if (ENC_uiAlpha == 65535 )
     {

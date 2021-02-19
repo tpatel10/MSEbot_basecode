@@ -11,7 +11,9 @@
 
 //---------------------------------------------------------------------------
 
-#define DEBUGPRINT 1
+#include "BreakPoint.h"
+
+//#define DEBUGPRINT 1
 #define ACCELERATIONRATE 1;
 
 

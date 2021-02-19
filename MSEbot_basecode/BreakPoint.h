@@ -63,9 +63,9 @@ usage
 #define WATCH_VARIABLE_9_TYPE uint32_t
 #define WATCH_VARIABLE_9 ENC_ui32LeftEncoderAveTime
  
-//#define WATCH_VARIABLE_10_NAME ""
-//#define WATCH_VARIABLE_10_TYPE uint32_t
-//#define WATCH_VARIABLE_10 
+#define WATCH_VARIABLE_10_NAME "ENC_SpeedTest;LL3;0;UL3;255"
+#define WATCH_VARIABLE_10_TYPE uint8_t
+#define WATCH_VARIABLE_10 ENC_SpeedTest
 
 #define WATCH_VARIABLE_11_NAME "ENC_ui32RightEncoderAveTime;LL2;8000;UL2;30000" //only 6 charting varable allowed, first number is minimun value ; 2nd is maximum value
 #define WATCH_VARIABLE_11_TYPE uint32_t
@@ -394,7 +394,7 @@ void WSVR_BP(unsigned char ucBPindex)
     {
      bWSVR_Halted = true;
        
-     if((ucBPindex != 0)  && (ucBPindex < 5))
+     if((ucBPindex > 0)  && (ucBPindex <= 5))
      {
        strWSVR_VariableData  = String("B#^;6");
        strWSVR_VariableData.setCharAt(4,(0x30 + ucBPindex));

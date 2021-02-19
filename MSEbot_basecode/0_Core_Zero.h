@@ -102,14 +102,17 @@ void Core_ZeroCode( void * pvParameters )
 
     
         CR0_ulPreviousMicrosCore0 = CR0_ulCurrentMicrosCore0;
-        
+        if(btRun)
+        {
+         ENC_Calibrate();
+        }
    
         switch(CR0_ucMainTimerCaseCore0)  //full switch run through is 1mS
         {
           //###############################################################################
           case 0: 
           {
-           
+            
             CR0_ucMainTimerCaseCore0 = 1;
             
             break;
@@ -141,7 +144,7 @@ void Core_ZeroCode( void * pvParameters )
             uiTestCounter = uiTestCounter + 1;  //used as test can be removed
              //new break point function , use this function over the old WSVR_BreakPoint function
               //move it to where ever you need a break point can use 1 to 5 break points
-              WSVR_BP(1);
+             // WSVR_BP(1);
 
               
             CR0_ucMainTimerCaseCore0 = 4;
@@ -150,7 +153,7 @@ void Core_ZeroCode( void * pvParameters )
           //###############################################################################
           case 4:   ///warning exceed wdt time
           {
-            WDT_CheckOperationTime();
+            //WDT_CheckOperationTime();
             CR0_ucMainTimerCaseCore0 = 5;
             break;
           }
