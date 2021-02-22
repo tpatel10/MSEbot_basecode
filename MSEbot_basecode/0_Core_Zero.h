@@ -88,6 +88,7 @@ void Core_ZeroCode( void * pvParameters )
    ENC_Init();
   //loop function for core 0
   //-------------------------------------------------------------------------------------------
+ 
   for(;;)
   {
 
@@ -102,10 +103,14 @@ void Core_ZeroCode( void * pvParameters )
 
     
         CR0_ulPreviousMicrosCore0 = CR0_ulCurrentMicrosCore0;
-        if(btRun)
-        {
-         ENC_Calibrate();
-        }
+        
+//        if(btRun)
+//        {
+//         ENC_SpeedTesting();
+//    
+//        }
+    
+       
    
         switch(CR0_ucMainTimerCaseCore0)  //full switch run through is 1mS
         {

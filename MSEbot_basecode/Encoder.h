@@ -11,10 +11,20 @@
 
 //---------------------------------------------------------------------------
 
+void ENC_ClearMotorRunningFlags(void);
+void ENC_SetMotorRunningFlags(void);
+boolean ENC_ISMotorRunning(void);
+void ENC_ClearCheckOdoemterFlags(void);
+void ENC_SetCheckOdoemterFlags(void);
+boolean ENC_ISCheckingOdometer(void);
+
+
+
 #include "Motion.h";
 #include "BreakPoint.h"
 
- 
+#define ALPHA 32768
+#define ALPHAMIN 2048
 
  volatile boolean ENC_btLeftEncoderADataFlag;
  volatile boolean ENC_btLeftEncoderBDataFlag;
@@ -24,28 +34,31 @@
  volatile boolean ENC_btLeftMotorRunningFlag;
  volatile boolean ENC_btRightMotorRunningFlag;
 
+  volatile boolean ENC_btLeftMotorOdometerCheckFlag;
+ volatile boolean ENC_btRightMotorOdometerCheckFlag;
+
  volatile uint16_t ENC_vui16LeftEncoderAMissed;
  volatile uint16_t ENC_vui16LeftEncoderBMissed;
  volatile uint16_t ENC_vui16RightEncoderAMissed;
  volatile uint16_t ENC_vui16RightEncoderBMissed;
 
  
- uint16_t ENC_uiAlpha = 8196;
+ uint16_t ENC_uiAlpha = ALPHA;
 
- volatile int32_t ENC_vi32LeftEncoderARawTime;
- volatile int32_t ENC_vi32LeftEncoderBRawTime;
- volatile int32_t ENC_vi32RightEncoderARawTime;
- volatile int32_t ENC_vi32RightEncoderBRawTime;
+ volatile int32_t ENC_vi32LeftEncoderARawTime = 0;
+ volatile int32_t ENC_vi32LeftEncoderBRawTime = 0;
+ volatile int32_t ENC_vi32RightEncoderARawTime = 0;
+ volatile int32_t ENC_vi32RightEncoderBRawTime = 0;
 
 
  
- int32_t ENC_ui32LeftEncoderAAveTime;
- int32_t ENC_ui32LeftEncoderBAveTime;
- int32_t ENC_ui32RightEncoderAAveTime;
- int32_t ENC_ui32RightEncoderBAveTime;
+ int32_t ENC_ui32LeftEncoderAAveTime = 0;
+ int32_t ENC_ui32LeftEncoderBAveTime = 0;
+ int32_t ENC_ui32RightEncoderAAveTime = 0;
+ int32_t ENC_ui32RightEncoderBAveTime = 0;
 
- uint32_t ENC_ui32LeftEncoderAveTime;
- uint32_t ENC_ui32RightEncoderAveTime;
+ uint32_t ENC_ui32LeftEncoderAveTime = 0;
+ uint32_t ENC_ui32RightEncoderAveTime = 0;
 
  volatile int32_t ENC_vi32LeftOdometer;
  volatile int32_t ENC_vi32RightOdometer;
@@ -71,15 +84,23 @@
  uint8_t ENC_SpeedTest = 0;
  uint8_t ui8CalIndex = 0;
  bool    btSpeedTestUD = false;
- bool    btOnce = false;
+
 
  
-void ENC_Calibrate()
+void ENC_SpeedTesting()
 {
   
-  
+   
+    static uint32_t sui32StoreLeftAverageForward[256];
+    static uint32_t sui32StoreRightAverageForward[256];
+    static uint32_t sui32StoreLeftAverageBackward[256];
+    static uint32_t sui32StoreRightAverageBackward[256];
+   // static uint16_t sui16StoreIndex;
+
+
+    
    ENC_ulMotorTimerNow = millis();
-  if(ENC_ulMotorTimerNow - ENC_ulMotorTimerPrevious >= 100)   
+  if(ENC_ulMotorTimerNow - ENC_ulMotorTimerPrevious >= 200)   
   {  
    ENC_ulMotorTimerPrevious = ENC_ulMotorTimerNow;
    switch(ui8CalIndex)
@@ -87,8 +108,7 @@ void ENC_Calibrate()
     case 0:
     {
       
-      ENC_btLeftMotorRunningFlag = true;
-      ENC_btRightMotorRunningFlag = true;
+      
       
        if(btSpeedTestUD)
       {
@@ -103,7 +123,23 @@ void ENC_Calibrate()
         if(btSpeedTestUD)
         {
           btSpeedTestUD = false;
-          WSVR_BP(1);
+          btRun = false;
+          
+          for(uint16_t ui16Loop = 0; ui16Loop <= 255;ui16Loop++)
+            {
+             Serial.print(ui16Loop);
+             Serial.print(",");
+             Serial.print(sui32StoreLeftAverageForward[ui16Loop]);
+             Serial.print(",");
+             Serial.print(sui32StoreLeftAverageBackward[ui16Loop]);
+             Serial.print(",");
+             Serial.print(sui32StoreRightAverageForward[ui16Loop]);
+             Serial.print(",");
+             Serial.println(sui32StoreRightAverageBackward[ui16Loop]);
+             vTaskDelay(1);
+             
+            }
+          
         }
         else
         {
@@ -112,19 +148,21 @@ void ENC_Calibrate()
          
         
       }
+
+    
       ucMotorState = 1;
       move(ENC_SpeedTest); 
-      btOnce = true;
+   
       
       ui8CalIndex = 1;
       break;
     }
     case 1:
     {
-      if(btOnce)
-      {
-       btOnce = false;
-      
+     
+       
+        ENC_btLeftMotorRunningFlag = true;
+        ENC_btRightMotorRunningFlag = true;
         ENC_ui32LeftEncoderAveTimeMaxA = 0;
         ENC_ui32RightEncoderAveTimeMaxA =  0;
         ENC_ui32LeftEncoderAveTimeMinA = 0xffffffff;
@@ -139,7 +177,7 @@ void ENC_Calibrate()
         ENC_ui32RightEncoderBAveTime = 0;
         ENC_ui32LeftEncoderAveTime = 0;
         ENC_ui32RightEncoderAveTime = 0;
-      }
+   
       ui8CalIndex = 2;
       break;
     }
@@ -193,41 +231,28 @@ void ENC_Calibrate()
     }
     case 10:
     {
-      Serial.print(ENC_SpeedTest);
-      Serial.print(",");
-      Serial.print(ENC_ui32LeftEncoderAveTime);
-      Serial.print(",");
-      
-      Serial.print(ENC_ui32LeftEncoderAAveTime);
-      Serial.print(",");
-      Serial.print(ENC_ui32LeftEncoderAveTimeMaxA);
-      Serial.print(",");
-      Serial.print(ENC_ui32LeftEncoderAveTimeMinA);
-      Serial.print(",");
-      
-      Serial.print(ENC_ui32LeftEncoderBAveTime);
-      Serial.print(",");
-      Serial.print(ENC_ui32LeftEncoderAveTimeMaxB);
-      Serial.print(",");
-      Serial.print(ENC_ui32LeftEncoderAveTimeMinB);
-      Serial.print(",");
-      
-      Serial.print(ENC_ui32RightEncoderAveTime);
-      Serial.print(",");
-      
-      Serial.print(ENC_ui32RightEncoderAAveTime);
-      Serial.print(",");
-      Serial.print(ENC_ui32RightEncoderAveTimeMaxA);
-      Serial.print(",");
-      Serial.print(ENC_ui32RightEncoderAveTimeMinA);
-      Serial.print(",");
 
-      Serial.print(ENC_ui32RightEncoderBAveTime);
-      Serial.print(",");
-      Serial.print(ENC_ui32RightEncoderAveTimeMaxB);
-      Serial.print(",");
-      Serial.println(ENC_ui32RightEncoderAveTimeMinB);  
+        if((ENC_ui32LeftEncoderAveTime == 0)  && (ENC_ui32RightEncoderAveTime == 0) && (btSpeedTestUD == 0))
+        {
+          btSpeedTestUD = true;
+        }
 
+ 
+         if(btSpeedTestUD)
+         {
+           ENC_ClearMotorRunningFlags();
+           sui32StoreLeftAverageBackward[ENC_SpeedTest]  = ENC_ui32LeftEncoderAveTime;
+           sui32StoreRightAverageBackward[ENC_SpeedTest]  = ENC_ui32RightEncoderAveTime;
+         }
+         else
+         {
+           ENC_ClearMotorRunningFlags();
+           sui32StoreLeftAverageForward[ENC_SpeedTest]  = ENC_ui32LeftEncoderAveTime;
+           sui32StoreRightAverageForward[ENC_SpeedTest]  = ENC_ui32RightEncoderAveTime;
+         }
+        // sui16StoreIndex += 1;
+        
+      
       ui8CalIndex = 0;
       break;
     }
@@ -236,9 +261,24 @@ void ENC_Calibrate()
  }
 }
 
+
+
+void ENC_ClearMotorRunningFlags()
+{
+  ENC_btLeftMotorRunningFlag = false;
+  ENC_btRightMotorRunningFlag = false;
+}
+
+void ENC_SetMotorRunningFlags()
+{
+  ENC_btLeftMotorRunningFlag = true;
+  ENC_btRightMotorRunningFlag = true;
+}
+
+
 boolean ENC_ISMotorRunning()
 {
-  if((ENC_btLeftMotorRunningFlag) && (ENC_btLeftMotorRunningFlag))
+  if((ENC_btLeftMotorRunningFlag) && (ENC_btRightMotorRunningFlag))
   {
     return(1);
   }
@@ -248,6 +288,32 @@ boolean ENC_ISMotorRunning()
   }
 }
 
+void ENC_ClearCheckOdoemterFlags()
+{
+  ENC_btLeftMotorOdometerCheckFlag = false;
+  ENC_btRightMotorOdometerCheckFlag = false;
+}
+
+void ENC_SetCheckOdoemterFlags()
+{
+  ENC_btLeftMotorOdometerCheckFlag = true;
+  ENC_btRightMotorOdometerCheckFlag = true;
+}
+
+boolean ENC_ISCheckingOdometer()
+{
+  if((ENC_btLeftMotorOdometerCheckFlag) && (ENC_btRightMotorOdometerCheckFlag))
+  {
+    return(1);
+  }
+  else
+  {
+     return(0);
+  }
+}
+
+
+
 void ENC_SetDistance(int32_t i32LeftDistance, int32_t i32RightDistance)
 {
   
@@ -255,6 +321,8 @@ void ENC_SetDistance(int32_t i32LeftDistance, int32_t i32RightDistance)
    ENC_vi32RightOdometerCompare = ENC_vi32RightOdometer + i32RightDistance;
    ENC_btLeftMotorRunningFlag = true;
    ENC_btRightMotorRunningFlag = true;
+   ENC_btRightMotorOdometerCheckFlag = true;
+   ENC_btLeftMotorOdometerCheckFlag = true;
    ui8LeftWorkingSpeed = cui8StartingSpeed;
    ui8RightWorkingSpeed = cui8StartingSpeed;
 
@@ -296,20 +364,24 @@ void IRAM_ATTR ENC_isrLeftA()
   
   if(ENC_btLeftMotorRunningFlag)
   {
-    if(ENC_vi32LeftOdometer == ENC_vi32LeftOdometerCompare)
+    if(ENC_btLeftMotorOdometerCheckFlag)
     {
-      ENC_btLeftMotorRunningFlag = false;
-      ENC_btRightMotorRunningFlag = false;
-      digitalWrite(ciMotorLeftA,HIGH);
-      digitalWrite(ciMotorLeftB,HIGH);
-      digitalWrite(ciMotorRightA,HIGH);
-      digitalWrite(ciMotorRightB,HIGH);
-      ledcWrite(2,255);
-      ledcWrite(1,255);  //stop with braking Left motor 
-      ledcWrite(3,255);
-      ledcWrite(4,255);  //stop with braking Right motor 
+      if(ENC_vi32LeftOdometer >= ENC_vi32LeftOdometerCompare)
+      {
+        ENC_btLeftMotorRunningFlag = false;
+        ENC_btRightMotorRunningFlag = false;
+        ENC_btRightMotorOdometerCheckFlag = false;
+        ENC_btLeftMotorOdometerCheckFlag = false;
+        digitalWrite(ciMotorLeftA,HIGH);
+        digitalWrite(ciMotorLeftB,HIGH);
+        digitalWrite(ciMotorRightA,HIGH);
+        digitalWrite(ciMotorRightB,HIGH);
+        ledcWrite(2,255);
+        ledcWrite(1,255);  //stop with braking Left motor 
+        ledcWrite(3,255);
+        ledcWrite(4,255);  //stop with braking Right motor 
+      }
     }
-    
   }
   
 }
@@ -342,20 +414,24 @@ void IRAM_ATTR ENC_isrLeftB()
   }
   if(ENC_btLeftMotorRunningFlag)
   {
-    if(ENC_vi32LeftOdometer == ENC_vi32LeftOdometerCompare)
+    if(ENC_btLeftMotorOdometerCheckFlag)
     {
+      if(ENC_vi32LeftOdometer >= ENC_vi32LeftOdometerCompare)
+      {
         ENC_btLeftMotorRunningFlag = false;
-      ENC_btRightMotorRunningFlag = false;
-      digitalWrite(ciMotorLeftA,HIGH);
-      digitalWrite(ciMotorLeftB,HIGH);
-      digitalWrite(ciMotorRightA,HIGH);
-      digitalWrite(ciMotorRightB,HIGH);
-      ledcWrite(2,255);
-      ledcWrite(1,255);  //stop with braking Left motor 
-      ledcWrite(3,255);
-      ledcWrite(4,255);  //stop with braking Right motor 
+        ENC_btRightMotorRunningFlag = false;
+        ENC_btRightMotorOdometerCheckFlag = false;
+        ENC_btLeftMotorOdometerCheckFlag = false;
+        digitalWrite(ciMotorLeftA,HIGH);
+        digitalWrite(ciMotorLeftB,HIGH);
+        digitalWrite(ciMotorRightA,HIGH);
+        digitalWrite(ciMotorRightB,HIGH);
+        ledcWrite(2,255);
+        ledcWrite(1,255);  //stop with braking Left motor 
+        ledcWrite(3,255);
+        ledcWrite(4,255);  //stop with braking Right motor 
+      }
     }
-    
   }
 }
 
@@ -387,20 +463,24 @@ void IRAM_ATTR ENC_isrRightA()
   }
   if(ENC_btRightMotorRunningFlag)
   {
-    if(ENC_vi32RightOdometer == ENC_vi32RightOdometerCompare)
+    if(ENC_btRightMotorOdometerCheckFlag)
     {
+      if(ENC_vi32RightOdometer >= ENC_vi32RightOdometerCompare)
+      {
         ENC_btLeftMotorRunningFlag = false;
-      ENC_btRightMotorRunningFlag = false;
-      digitalWrite(ciMotorLeftA,HIGH);
-      digitalWrite(ciMotorLeftB,HIGH);
-      digitalWrite(ciMotorRightA,HIGH);
-      digitalWrite(ciMotorRightB,HIGH);
-      ledcWrite(2,255);
-      ledcWrite(1,255);  //stop with braking Left motor 
-      ledcWrite(3,255);
-      ledcWrite(4,255);  //stop with braking Right motor 
+        ENC_btRightMotorRunningFlag = false;
+        ENC_btRightMotorOdometerCheckFlag = false;
+        ENC_btLeftMotorOdometerCheckFlag = false;
+        digitalWrite(ciMotorLeftA,HIGH);
+        digitalWrite(ciMotorLeftB,HIGH);
+        digitalWrite(ciMotorRightA,HIGH);
+        digitalWrite(ciMotorRightB,HIGH);
+        ledcWrite(2,255);
+        ledcWrite(1,255);  //stop with braking Left motor 
+        ledcWrite(3,255);
+        ledcWrite(4,255);  //stop with braking Right motor 
+      }
     }
-    
   }
 }
 
@@ -433,20 +513,24 @@ void IRAM_ATTR ENC_isrRightB()
   }
   if(ENC_btRightMotorRunningFlag)
   {
-    if(ENC_vi32RightOdometer == ENC_vi32RightOdometerCompare)
+    if(ENC_btRightMotorOdometerCheckFlag)
     {
-       ENC_btLeftMotorRunningFlag = false;
-      ENC_btRightMotorRunningFlag = false;
-      digitalWrite(ciMotorLeftA,HIGH);
-      digitalWrite(ciMotorLeftB,HIGH);
-      digitalWrite(ciMotorRightA,HIGH);
-      digitalWrite(ciMotorRightB,HIGH);
-      ledcWrite(2,255);
-      ledcWrite(1,255);  //stop with braking Left motor 
-      ledcWrite(3,255);
-      ledcWrite(4,255);  //stop with braking Right motor  
+      if(ENC_vi32RightOdometer >= ENC_vi32RightOdometerCompare)
+      {
+        ENC_btLeftMotorRunningFlag = false;
+        ENC_btRightMotorRunningFlag = false;
+        ENC_btRightMotorOdometerCheckFlag = false;
+        ENC_btLeftMotorOdometerCheckFlag = false;
+        digitalWrite(ciMotorLeftA,HIGH);
+        digitalWrite(ciMotorLeftB,HIGH);
+        digitalWrite(ciMotorRightA,HIGH);
+        digitalWrite(ciMotorRightB,HIGH);
+        ledcWrite(2,255);
+        ledcWrite(1,255);  //stop with braking Left motor 
+        ledcWrite(3,255);
+        ledcWrite(4,255);  //stop with braking Right motor 
+      }
     }
-    
   }
 }
 //---------------------------------------------------------------------------------------------
@@ -467,6 +551,8 @@ void ENC_Init()
 
   ENC_btLeftMotorRunningFlag = false;
   ENC_btRightMotorRunningFlag = false;
+  ENC_btLeftMotorOdometerCheckFlag = false;
+  ENC_btRightMotorOdometerCheckFlag = false;
 
 
   //check to see if calibration is in eeprom and retreive
@@ -487,10 +573,30 @@ void ENC_Disable()
 
 int32_t ENC_Averaging()
 {
-    
+  static uint8_t sui8AlphaDelay;  
   int64_t vi64CalutatedAverageTime;
   
    //yn=yn−1⋅(1−α)+xn⋅α  exponentially weighted moving average IIR Filter 65535 = 1
+
+   if(ENC_ISMotorRunning())
+    {
+      sui8AlphaDelay = sui8AlphaDelay + 1;
+      if(sui8AlphaDelay > 3)
+      {
+        sui8AlphaDelay = 0;
+        ENC_uiAlpha = ENC_uiAlpha >> 1;
+      }
+      
+      if(ENC_uiAlpha < ALPHAMIN)
+      {
+        ENC_uiAlpha = ALPHAMIN;
+      }
+    }
+    else
+    {
+      
+      ENC_uiAlpha = ALPHA;
+    }
 
    //Left Enoder A
    
@@ -520,7 +626,9 @@ int32_t ENC_Averaging()
     }
     if(ENC_ISMotorRunning())
       {
+               
         ENC_ui32LeftEncoderAveTime = ((ENC_ui32LeftEncoderAAveTime + ENC_ui32LeftEncoderBAveTime) * 3)/1000;
+       
       }
   }
 
@@ -550,8 +658,11 @@ int32_t ENC_Averaging()
     }
     if(ENC_ISMotorRunning())
       {
+       
         ENC_ui32LeftEncoderAveTime = ((ENC_ui32LeftEncoderAAveTime + ENC_ui32LeftEncoderBAveTime) * 3)/1000;
+        
       }
+     
   }
 
   

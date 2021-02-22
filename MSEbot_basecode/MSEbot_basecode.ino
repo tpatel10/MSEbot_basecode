@@ -70,6 +70,7 @@ boolean btRun = false;
 
 #include <Adafruit_NeoPixel.h>
 #include <Math.h>
+#include "Encoder.h"
 #include "Motion.h";
 #include "MyWEBserver.h"
 #include "BreakPoint.h"
@@ -235,10 +236,12 @@ void loop()
       
       if(btRun)
       {
-     /*  CR1_ulMotorTimerNow = millis();
-       if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
-       {   
-         CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
+//       CR1_ulMotorTimerNow = millis();
+//       if(CR1_ulMotorTimerNow - CR1_ulMotorTimerPrevious >= CR1_ciMotorRunTime)   
+//       {   
+//         CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
+         if(!ENC_ISMotorRunning())
+         {
          switch(ucMotorStateIndex)
          {
           case 0:
@@ -252,18 +255,19 @@ void loop()
           {
             
             ENC_SetDistance(10000, 10000);
-            ucMotorState = 1;   //forward
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
+            ucMotorState = 5;   //forward slow
+            CR1_ui8LeftWheelSpeed = 200;
+            CR1_ui8RightWheelSpeed = 150;
             ucMotorStateIndex = 2;
                      
             break;
           }
            case 2:
           {
-            ucMotorStateIndex = 3;
+            ucMotorStateIndex = 1;
             ucMotorState = 0;
             move(0);
+            btRun = false;
             break;
           }
           case 3:
@@ -347,7 +351,7 @@ void loop()
         
         
          }
-        }*/
+        }
       }
       CR1_ucMainTimerCaseCore1 = 1;
       
@@ -374,9 +378,9 @@ void loop()
     case 3: 
     {
       //move bot X number of odometer ticks
-      if(ENC_ISMotorRunning())
+      if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
       {
-      //  MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
       }
    
       CR1_ucMainTimerCaseCore1 = 4;

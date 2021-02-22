@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 
 #include "BreakPoint.h"
+#include "Encoder.h"
 
 //#define DEBUGPRINT 1
 #define ACCELERATIONRATE 1;
@@ -20,6 +21,8 @@
 
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
+unsigned char ucPrevious_Speed;
+unsigned char ucNow_Speed;
 
 const uint8_t cui8StartingSpeed = 140;
 
@@ -73,7 +76,8 @@ void ResetSpeeds()
 void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
 {
     int  iPrintOnce;
-      
+
+    static uint8_t aui8SlowPulsing;  
    
      switch(ui8Direction)
       {
@@ -189,7 +193,27 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
        
           break;
         }
-     
+       //forward slow
+        case 5:
+        {
+           ui8LeftWorkingSpeed = ui8LeftSpeed;
+           ui8RightWorkingSpeed = ui8RightSpeed;
+           aui8SlowPulsing = aui8SlowPulsing + 1;
+           if(aui8SlowPulsing > 5)
+           {
+            aui8SlowPulsing = 0; 
+            ui8LeftWorkingSpeed = 250;
+           ui8RightWorkingSpeed = 250;
+           }
+          
+          
+          ledcWrite(2,0);
+          ledcWrite(1,ui8LeftWorkingSpeed);
+          ledcWrite(4,0);
+          ledcWrite(3,ui8RightWorkingSpeed);
+          
+          break;
+        }
         
       }
  }
@@ -203,11 +227,15 @@ void move(uint8_t ui8Speed)
         //Stop, coast mode
         case 0:
         {
+          ucPrevious_Speed = ui8Speed;
+          ucNow_Speed = 0;
           //if 0 is put in both INs motors will coast stop 
           ledcWrite(2,0);
           ledcWrite(1,0);
           ledcWrite(4,0);
           ledcWrite(3,0);
+          ENC_ClearMotorRunningFlags();
+          ENC_ClearCheckOdoemterFlags();
         //ucWorkingButtonState = 9;
       #ifdef DEBUGPRINT  
           if(iPrintOnce != 0)
@@ -224,10 +252,14 @@ void move(uint8_t ui8Speed)
         case 1:
         {
           //ui8speed = dForwardSpeed;
+          ucPrevious_Speed = ucNow_Speed;
+          ucNow_Speed = ui8Speed;
+          ENC_SetMotorRunningFlags();
           ledcWrite(2,0);
           ledcWrite(1,ui8Speed);
           ledcWrite(4,0);
           ledcWrite(3,ui8Speed);
+          
           //ucWorkingButtonState = 9;
         #ifdef DEBUGPRINT  
           if(iPrintOnce != 1)
@@ -243,6 +275,9 @@ void move(uint8_t ui8Speed)
         case 2:
         {
           ui8Speed = dLeftSpeed;
+          ucPrevious_Speed = ucNow_Speed;
+          ucNow_Speed = ui8Speed;        
+          ENC_SetMotorRunningFlags();
           ledcWrite(2,0);
           ledcWrite(1,ui8Speed);
           ledcWrite(3,0);
@@ -262,6 +297,9 @@ void move(uint8_t ui8Speed)
         case 3:
         {
           ui8Speed = dRightSpeed;
+          ucPrevious_Speed = ucNow_Speed;
+          ucNow_Speed = ui8Speed;
+          ENC_SetMotorRunningFlags();
           ledcWrite(1,0);
           ledcWrite(2,ui8Speed);
           ledcWrite(4,0);
@@ -281,6 +319,9 @@ void move(uint8_t ui8Speed)
         case 4:
         {
           // ui8speed = dReverseSpeed;
+          ucPrevious_Speed = ucNow_Speed;
+          ucNow_Speed = ui8Speed;
+          ENC_SetMotorRunningFlags();
           ledcWrite(1,0);
           ledcWrite(2,ui8Speed);
           ledcWrite(3,0);
@@ -299,11 +340,15 @@ void move(uint8_t ui8Speed)
         //Stop  braking mode
         case 5:
         {
+          ucPrevious_Speed = ucNow_Speed;
+          ucNow_Speed = 255;
           //if 255 is put in both INs brakes will be applied 
           ledcWrite(2,255);
           ledcWrite(1,255);
           ledcWrite(4,255);
           ledcWrite(3,255);
+          ENC_ClearMotorRunningFlags();
+          ENC_ClearCheckOdoemterFlags();
         //ucWorkingButtonState = 9;
       #ifdef DEBUGPRINT  
           if(iPrintOnce != 0)
@@ -317,4 +362,6 @@ void move(uint8_t ui8Speed)
         }
       }
 }
+
+
 #endif
