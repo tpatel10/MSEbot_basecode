@@ -63,7 +63,7 @@ usage
 #define WATCH_VARIABLE_9_TYPE uint32_t
 #define WATCH_VARIABLE_9 ENC_ui32LeftEncoderAveTime
  
-#define WATCH_VARIABLE_10_NAME "ENC_SpeedTest;LL3;0;UL3;255"
+#define WATCH_VARIABLE_10_NAME "ENC_SpeedTest"
 #define WATCH_VARIABLE_10_TYPE uint8_t
 #define WATCH_VARIABLE_10 ENC_SpeedTest
 
@@ -82,18 +82,18 @@ usage
 #define WATCH_VARIABLE_13 ENC_uiAlpha
 ////
 //
-#define WATCH_VARIABLE_14_NAME "ENC_vi32RightOdometerCompare"
-#define WATCH_VARIABLE_14_TYPE volatile int32_t
-#define WATCH_VARIABLE_14 ENC_vi32RightOdometerCompare
+#define WATCH_VARIABLE_14_NAME "i32AverageDifference;LL3;-5000;UL3;5000" 
+#define WATCH_VARIABLE_14_TYPE  int32_t
+#define WATCH_VARIABLE_14 i32AverageDifference
 
-//#define WATCH_VARIABLE_15_NAME "ENC_vi32LeftEncoderARawTime"
-//#define WATCH_VARIABLE_15_TYPE volatile int32_t
-//#define WATCH_VARIABLE_15 ENC_vi32LeftEncoderARawTime
-////
+#define WATCH_VARIABLE_15_NAME "ui8LeftWorkingSpeed"
+#define WATCH_VARIABLE_15_TYPE uint8_t
+#define WATCH_VARIABLE_15 ui8LeftWorkingSpeed
 //
-//#define WATCH_VARIABLE_16_NAME "ENC_vi32LeftEncoderBRawTime"
-//#define WATCH_VARIABLE_16_TYPE volatile int32_t
-//#define WATCH_VARIABLE_16 ENC_vi32LeftEncoderBRawTime
+
+#define WATCH_VARIABLE_16_NAME "ui8RightWorkingSpeed"
+#define WATCH_VARIABLE_16_TYPE uint8_t
+#define WATCH_VARIABLE_16 ui8LeftWorkingSpeed
 // 
 ////-----------------------------------------------------------
 ////Row 5

@@ -15,7 +15,9 @@
 #include "Encoder.h"
 
 //#define DEBUGPRINT 1
-#define ACCELERATIONRATE 1;
+#define ACCELERATIONRATE 1
+
+#define KICKSPEED 230
 
 
 
@@ -30,6 +32,8 @@ uint8_t ui8LeftWorkingSpeed = cui8StartingSpeed;
 uint8_t ui8RightWorkingSpeed = cui8StartingSpeed;
 
 unsigned char ucMotorState = 0;
+
+int32_t i32AverageDifference;
 
 double dManualSpeed;
 double dForwardSpeed;
@@ -78,7 +82,9 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
     int  iPrintOnce;
 
     static uint8_t aui8SlowPulsing;  
-   
+
+     ui8LeftWorkingSpeed = ui8LeftSpeed;
+     ui8RightWorkingSpeed = ui8RightSpeed;
      switch(ui8Direction)
       {
       
@@ -196,21 +202,53 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
        //forward slow
         case 5:
         {
-           ui8LeftWorkingSpeed = ui8LeftSpeed;
-           ui8RightWorkingSpeed = ui8RightSpeed;
+           
            aui8SlowPulsing = aui8SlowPulsing + 1;
-           if(aui8SlowPulsing > 5)
+           if(aui8SlowPulsing > 10)
            {
             aui8SlowPulsing = 0; 
-            ui8LeftWorkingSpeed = 250;
-           ui8RightWorkingSpeed = 250;
+            ledcWrite(2,0);
+            ledcWrite(1,KICKSPEED);
+            ledcWrite(4,0);
+            ledcWrite(3,KICKSPEED);
            }
+           else
+           {
+            i32AverageDifference = ENC_ui32LeftEncoderAveTime - ENC_ui32RightEncoderAveTime;
+            if(i32AverageDifference > 2000)
+            {
+              ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + 20;
+              if(ui8LeftWorkingSpeed > KICKSPEED)
+              {
+                ui8LeftWorkingSpeed = KICKSPEED; 
+              }
+              ui8RightWorkingSpeed = ui8RightWorkingSpeed - 20;
+              if(ui8RightWorkingSpeed < 10)
+              {
+                ui8RightWorkingSpeed = 20;
+              }
+            }
+            else
+            {
+              ui8LeftWorkingSpeed = ui8LeftWorkingSpeed - 20;
+              if(ui8LeftWorkingSpeed < 10)
+              {
+                ui8LeftWorkingSpeed = 20;
+              }
+              ui8RightWorkingSpeed = ui8RightWorkingSpeed + 20;
+              if(ui8RightWorkingSpeed > KICKSPEED)
+              {
+                ui8RightWorkingSpeed = KICKSPEED; 
+              }
+            
+             ledcWrite(2,0);
+             ledcWrite(1,ui8LeftWorkingSpeed);
+             ledcWrite(4,0);
+             ledcWrite(3,ui8RightWorkingSpeed);
+           }
+         }
           
-          
-          ledcWrite(2,0);
-          ledcWrite(1,ui8LeftWorkingSpeed);
-          ledcWrite(4,0);
-          ledcWrite(3,ui8RightWorkingSpeed);
+         
           
           break;
         }

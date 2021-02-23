@@ -256,8 +256,8 @@ void loop()
             
             ENC_SetDistance(10000, 10000);
             ucMotorState = 5;   //forward slow
-            CR1_ui8LeftWheelSpeed = 200;
-            CR1_ui8RightWheelSpeed = 150;
+            CR1_ui8LeftWheelSpeed = 25;
+            CR1_ui8RightWheelSpeed = 25;
             ucMotorStateIndex = 2;
                      
             break;
@@ -369,7 +369,11 @@ void loop()
     //###############################################################################
     case 2: 
     {
-    
+       //move bot X number of odometer ticks
+      if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
+      {
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+      }
      
       CR1_ucMainTimerCaseCore1 = 3;
       break;
@@ -377,11 +381,7 @@ void loop()
     //###############################################################################
     case 3: 
     {
-      //move bot X number of odometer ticks
-      if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
-      {
-        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
-      }
+     
    
       CR1_ucMainTimerCaseCore1 = 4;
       break;
@@ -396,11 +396,12 @@ void loop()
     //###############################################################################
     case 5: 
     {
-      
-      
-      // Serial.println(uiTestCounter);
-
-       
+      //move bot X number of odometer ticks
+      if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
+      {
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+      }
+    
       CR1_ucMainTimerCaseCore1 = 6;
       break;
     }
@@ -432,7 +433,11 @@ void loop()
     //###############################################################################
     case 8: 
     {
-    
+      //move bot X number of odometer ticks
+      if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
+      {
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+      }
       CR1_ucMainTimerCaseCore1 = 9;
       break;
     }
