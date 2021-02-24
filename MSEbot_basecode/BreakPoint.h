@@ -93,7 +93,7 @@ usage
 
 #define WATCH_VARIABLE_16_NAME "ui8RightWorkingSpeed"
 #define WATCH_VARIABLE_16_TYPE uint8_t
-#define WATCH_VARIABLE_16 ui8LeftWorkingSpeed
+#define WATCH_VARIABLE_16 ui8RightWorkingSpeed
 // 
 ////-----------------------------------------------------------
 ////Row 5

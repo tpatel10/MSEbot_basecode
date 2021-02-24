@@ -255,9 +255,9 @@ void loop()
           {
             
             ENC_SetDistance(10000, 10000);
-            ucMotorState = 5;   //forward slow
-            CR1_ui8LeftWheelSpeed = 25;
-            CR1_ui8RightWheelSpeed = 25;
+            ucMotorState = 6;   //forward slow
+            CR1_ui8LeftWheelSpeed = 145;
+            CR1_ui8RightWheelSpeed = 90;
             ucMotorStateIndex = 2;
                      
             break;
@@ -372,7 +372,7 @@ void loop()
        //move bot X number of odometer ticks
       if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
       {
-        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8RightWheelSpeed);
       }
      
       CR1_ucMainTimerCaseCore1 = 3;
@@ -399,7 +399,7 @@ void loop()
       //move bot X number of odometer ticks
       if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
       {
-        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8RightWheelSpeed);
       }
     
       CR1_ucMainTimerCaseCore1 = 6;
@@ -436,7 +436,7 @@ void loop()
       //move bot X number of odometer ticks
       if(ENC_ISMotorRunning() && ENC_ISCheckingOdometer())
       {
-        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8LeftWheelSpeed);
+        MoveTo(ucMotorState, CR1_ui8LeftWheelSpeed,CR1_ui8RightWheelSpeed);
       }
       CR1_ucMainTimerCaseCore1 = 9;
       break;

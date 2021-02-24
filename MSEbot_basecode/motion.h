@@ -82,9 +82,9 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
     int  iPrintOnce;
 
     static uint8_t aui8SlowPulsing;  
+    static uint8_t aui8SlowCheck;  
 
-     ui8LeftWorkingSpeed = ui8LeftSpeed;
-     ui8RightWorkingSpeed = ui8RightSpeed;
+     
      switch(ui8Direction)
       {
       
@@ -202,57 +202,68 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
        //forward slow
         case 5:
         {
-           
+           ui8LeftWorkingSpeed = ui8LeftSpeed;
+           ui8RightWorkingSpeed = ui8RightSpeed;
            aui8SlowPulsing = aui8SlowPulsing + 1;
            if(aui8SlowPulsing > 10)
            {
             aui8SlowPulsing = 0; 
-            ledcWrite(2,0);
-            ledcWrite(1,KICKSPEED);
-            ledcWrite(4,0);
-            ledcWrite(3,KICKSPEED);
+            ui8LeftWorkingSpeed = KICKSPEED;
+            ui8RightWorkingSpeed = KICKSPEED;
            }
-           else
+           i32AverageDifference = ENC_vi32RightOdometer - ENC_vi32LeftOdometer;
+           aui8SlowCheck = aui8SlowCheck + 1;
+           if(aui8SlowCheck >= 6)
            {
-            i32AverageDifference = ENC_ui32LeftEncoderAveTime - ENC_ui32RightEncoderAveTime;
-            if(i32AverageDifference > 2000)
+            aui8SlowCheck = 0;
+            if(i32AverageDifference > 20)
             {
-              ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + 20;
-              if(ui8LeftWorkingSpeed > KICKSPEED)
-              {
-                ui8LeftWorkingSpeed = KICKSPEED; 
-              }
-              ui8RightWorkingSpeed = ui8RightWorkingSpeed - 20;
-              if(ui8RightWorkingSpeed < 10)
-              {
-                ui8RightWorkingSpeed = 20;
-              }
+              ui8RightWorkingSpeed = 0;
             }
-            else
+            if(i32AverageDifference < -20)
             {
-              ui8LeftWorkingSpeed = ui8LeftWorkingSpeed - 20;
-              if(ui8LeftWorkingSpeed < 10)
-              {
-                ui8LeftWorkingSpeed = 20;
-              }
-              ui8RightWorkingSpeed = ui8RightWorkingSpeed + 20;
-              if(ui8RightWorkingSpeed > KICKSPEED)
-              {
-                ui8RightWorkingSpeed = KICKSPEED; 
-              }
+              ui8LeftWorkingSpeed = 0;
+            }
             
-             ledcWrite(2,0);
-             ledcWrite(1,ui8LeftWorkingSpeed);
-             ledcWrite(4,0);
-             ledcWrite(3,ui8RightWorkingSpeed);
            }
-         }
-          
-         
-          
+           ledcWrite(2,0);
+           ledcWrite(1,ui8LeftWorkingSpeed);
+           ledcWrite(4,0);
+           ledcWrite(3,ui8RightWorkingSpeed);
+       
           break;
         }
-        
+         //forward slow 2
+        case 6:
+        {
+           ui8LeftWorkingSpeed = ui8LeftSpeed;
+           ui8RightWorkingSpeed = ui8RightSpeed;
+           aui8SlowPulsing = aui8SlowPulsing + 1;
+           if(aui8SlowPulsing > 10)
+           {
+            aui8SlowPulsing = 0; 
+            ui8LeftWorkingSpeed = KICKSPEED;
+            ui8RightWorkingSpeed = KICKSPEED;
+           }
+           i32AverageDifference = ENC_vi32RightOdometer - ENC_vi32LeftOdometer;
+           aui8SlowCheck = aui8SlowCheck + 1;
+           if(i32AverageDifference > 10)
+           {
+             ui8RightWorkingSpeed = 0;
+           }
+           if(i32AverageDifference < -10)
+           {
+             ui8LeftWorkingSpeed = 0;
+           }
+            
+         
+           ledcWrite(2,0);
+           ledcWrite(1,ui8LeftWorkingSpeed);
+           ledcWrite(4,0);
+           ledcWrite(3,ui8RightWorkingSpeed);
+       
+          break;
+        }
       }
  }
 
